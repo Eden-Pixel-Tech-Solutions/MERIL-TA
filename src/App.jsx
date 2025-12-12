@@ -13,10 +13,8 @@ import CreateTenderPage from "./pages/Tenders/CreateTender";
 
 // Workdesk pages
 import ActiveWorkspaces from "./pages/Workdesk/ActiveWorkspaces";
-import PendingDocuments from "./pages/Workdesk/PendingDocuments";
-import ChecklistCompliance from "./pages/Workdesk/ChecklistCompliance";
-import TeamUploads from "./pages/Workdesk/TeamUploads";
-import ZipExport from "./pages/Workdesk/ZipExport";
+import Workspaces from "./pages/Workdesk/Workspaces";
+
 
 // Orders pages
 import GEMContracts from "./pages/Orders/GEMContracts";
@@ -71,10 +69,7 @@ function App() {
 
           {/* Tender Workdesk */}
           <Route path="/workdesk/active-workspaces" element={<ActiveWorkspaces />} />
-          <Route path="/workdesk/pending-documents" element={<PendingDocuments />} />
-          <Route path="/workdesk/checklist-compliance" element={<ChecklistCompliance />} />
-          <Route path="/workdesk/team-uploads" element={<TeamUploads />} />
-          <Route path="/workdesk/zip-export" element={<ZipExport />} />
+          <Route path="/workspace/:tenderId" element={<Workspaces />} />
 
           {/* Orders */}
           <Route path="/orders/gem-contracts" element={<GEMContracts />} />

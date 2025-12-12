@@ -54,13 +54,7 @@ const Navbar = () => {
       label: "Tender Workdesk",
       items: [
         { name: "Active Workspaces", path: "/workdesk/active-workspaces" },
-        { name: "Pending Documents", path: "/workdesk/pending-documents" },
-        {
-          name: "Team Uploads (Finance, Technical, Docs, Management)",
-          path: "/workdesk/team-uploads",
-        },
-        { name: "Checklist & Compliance", path: "/workdesk/checklist-compliance" },
-        { name: "Final ZIP Export for Submission", path: "/workdesk/zip-export" },
+        
       ],
     },
     {
