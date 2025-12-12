@@ -15,7 +15,6 @@ import CreateTenderPage from "./pages/Tenders/CreateTender";
 import ActiveWorkspaces from "./pages/Workdesk/ActiveWorkspaces";
 import Workspaces from "./pages/Workdesk/Workspaces";
 
-
 // Orders pages
 import GEMContracts from "./pages/Orders/GEMContracts";
 import WorkOrders from "./pages/Orders/WorkOrders";

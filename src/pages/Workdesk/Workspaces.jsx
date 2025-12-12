@@ -13,9 +13,15 @@ const TenderWorkspace = () => {
     { id: 6, name: 'Marketing', color: '#0891b2', icon: '📢', tasks: 9, files: 18 }
   ]);
 
+  // files: persisted uploaded files per dept
   const [files, setFiles] = useState({});
+  // tasks persisted per dept
   const [tasks, setTasks] = useState({});
   const [newTask, setNewTask] = useState('');
+
+  // tempUploads holds files chosen via input but not yet 'uploaded' (per dept)
+  // structure: { [deptId]: [ { tempId, file, name, size, selectedAt, description:'', tags:'' } ] }
+  const [tempUploads, setTempUploads] = useState({});
 
   const handleDepartmentClick = (dept) => {
     setSelectedDepartment(dept);
@@ -25,19 +31,99 @@ const TenderWorkspace = () => {
     if (!tasks[dept.id]) {
       setTasks(prev => ({ ...prev, [dept.id]: [] }));
     }
+    if (!tempUploads[dept.id]) {
+      setTempUploads(prev => ({ ...prev, [dept.id]: [] }));
+    }
   };
 
-  const handleFileUpload = (e, deptId) => {
-    const uploadedFiles = Array.from(e.target.files).map(file => ({
-      id: Date.now() + Math.random(),
+  // When user selects files from input, store them in tempUploads for that dept (and allow description/tags before final upload)
+  const handleFileSelect = (e, deptId) => {
+    const selected = Array.from(e.target.files).map(file => ({
+      tempId: Date.now() + Math.random(),
+      file,
       name: file.name,
       size: (file.size / 1024).toFixed(2) + ' KB',
-      uploadedAt: new Date().toLocaleDateString()
+      selectedAt: new Date().toLocaleDateString(),
+      description: '',
+      tags: '' // comma-separated tags string
     }));
-    
+
+    setTempUploads(prev => ({
+      ...prev,
+      [deptId]: [...(prev[deptId] || []), ...selected]
+    }));
+
+    // clear the input value so same file can be selected again if needed
+    e.target.value = null;
+  };
+
+  // confirm upload of a single temp file (index)
+  const handleConfirmUpload = (deptId, tempId) => {
+    const tempList = tempUploads[deptId] || [];
+    const item = tempList.find(t => t.tempId === tempId);
+    if (!item) return;
+
+    const uploadedFile = {
+      id: Date.now() + Math.random(),
+      name: item.name,
+      size: item.size,
+      uploadedAt: item.selectedAt,
+      description: item.description,
+      tags: item.tags ? item.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+    };
+
     setFiles(prev => ({
       ...prev,
-      [deptId]: [...(prev[deptId] || []), ...uploadedFiles]
+      [deptId]: [...(prev[deptId] || []), uploadedFile]
+    }));
+
+    // remove from tempUploads
+    setTempUploads(prev => ({
+      ...prev,
+      [deptId]: prev[deptId].filter(t => t.tempId !== tempId)
+    }));
+  };
+
+  // upload all temp files for dept (if any)
+  const handleConfirmUploadAll = (deptId) => {
+    const tempList = tempUploads[deptId] || [];
+    if (tempList.length === 0) return;
+
+    const uploaded = tempList.map(item => ({
+      id: Date.now() + Math.random(),
+      name: item.name,
+      size: item.size,
+      uploadedAt: item.selectedAt,
+      description: item.description,
+      tags: item.tags ? item.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+    }));
+
+    setFiles(prev => ({
+      ...prev,
+      [deptId]: [...(prev[deptId] || []), ...uploaded]
+    }));
+
+    setTempUploads(prev => ({
+      ...prev,
+      [deptId]: []
+    }));
+  };
+
+  // on-change handlers for description/tags in tempUploads
+  const updateTempUploadField = (deptId, tempId, field, value) => {
+    setTempUploads(prev => ({
+      ...prev,
+      [deptId]: (prev[deptId] || []).map(item =>
+        item.tempId === tempId ? { ...item, [field]: value } : item
+      )
+    }));
+  };
+
+  // existing file delete (uploaded)
+  const deleteFile = (deptId, fileId) => {
+    setFiles(prev => ({
+      ...prev,
+      [deptId]: prev[deptId].filter(file => file.id !== fileId)
     }));
   };
 
@@ -67,18 +153,20 @@ const TenderWorkspace = () => {
     }));
   };
 
-  const deleteFile = (deptId, fileId) => {
-    setFiles(prev => ({
-      ...prev,
-      [deptId]: prev[deptId].filter(file => file.id !== fileId)
-    }));
-  };
-
   const deleteTask = (deptId, taskId) => {
     setTasks(prev => ({
       ...prev,
       [deptId]: prev[deptId].filter(task => task.id !== taskId)
     }));
+  };
+
+  // New: Done button -> confirm popup -> remove the task if confirmed
+  const handleTaskDone = (deptId, taskId) => {
+    const confirmed = window.confirm('Are you sure you are done?');
+    if (confirmed) {
+      // remove task
+      deleteTask(deptId, taskId);
+    }
   };
 
   const renderOverview = () => (
@@ -206,16 +294,123 @@ const TenderWorkspace = () => {
               onMouseEnter={(e) => e.target.style.background = '#1e40af'}
               onMouseLeave={(e) => e.target.style.background = '#2563eb'}>
                 <Upload style={{ width: '1rem', height: '1rem' }} />
-                Upload Files
+                Select Files
                 <input
                   type="file"
                   multiple
                   style={{ display: 'none' }}
-                  onChange={(e) => handleFileUpload(e, selectedDepartment.id)}
+                  onChange={(e) => handleFileSelect(e, selectedDepartment.id)}
                 />
               </label>
             </div>
             
+            {/* TEMP UPLOAD AREA: show selected files with description & tags inputs and Upload buttons */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+              {(tempUploads[selectedDepartment.id] || []).length > 0 && (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                    <p style={{ margin: 0, fontSize: '0.95rem', color: '#374151' }}>{tempUploads[selectedDepartment.id].length} file(s) selected</p>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => handleConfirmUploadAll(selectedDepartment.id)}
+                        style={{
+                          padding: '0.6rem 0.9rem',
+                          background: '#2563eb',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontWeight: 600
+                        }}
+                        onMouseEnter={(e) => e.target.style.background = '#1e40af'}
+                        onMouseLeave={(e) => e.target.style.background = '#2563eb'}
+                      >
+                        Upload All
+                      </button>
+                    </div>
+                  </div>
+
+                  {(tempUploads[selectedDepartment.id] || []).map(item => (
+                    <div key={item.tempId} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', background: '#f8fafc', padding: '0.75rem', borderRadius: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0, flex: 1 }}>
+                        <FileText style={{ width: '1.25rem', height: '1.25rem', color: '#2563eb', flexShrink: 0 }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontWeight: '500', color: '#1f2937', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
+                          <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: '0.25rem 0 0 0' }}>{item.size} • {item.selectedAt}</p>
+
+                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                            <input
+                              type="text"
+                              placeholder="Description"
+                              value={item.description}
+                              onChange={(e) => updateTempUploadField(selectedDepartment.id, item.tempId, 'description', e.target.value)}
+                              style={{
+                                flex: 2,
+                                minWidth: '200px',
+                                padding: '0.5rem 0.75rem',
+                                border: '1px solid #e5e7eb',
+                                borderRadius: '6px',
+                                fontSize: '0.9rem'
+                              }}
+                            />
+                            <input
+                              type="text"
+                              placeholder="Tags (comma separated)"
+                              value={item.tags}
+                              onChange={(e) => updateTempUploadField(selectedDepartment.id, item.tempId, 'tags', e.target.value)}
+                              style={{
+                                flex: 1,
+                                minWidth: '160px',
+                                padding: '0.5rem 0.75rem',
+                                border: '1px solid #e5e7eb',
+                                borderRadius: '6px',
+                                fontSize: '0.9rem'
+                              }}
+                            />
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <button
+                                onClick={() => handleConfirmUpload(selectedDepartment.id, item.tempId)}
+                                style={{
+                                  padding: '0.5rem 0.75rem',
+                                  background: '#059669',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontWeight: 600,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.35rem'
+                                }}
+                                onMouseEnter={(e) => e.target.style.background = '#047857'}
+                                onMouseLeave={(e) => e.target.style.background = '#059669'}
+                              >
+                                <Upload style={{ width: '0.9rem', height: '0.9rem' }} /> Upload
+                              </button>
+                              <button
+                                onClick={() => setTempUploads(prev => ({ ...prev, [selectedDepartment.id]: prev[selectedDepartment.id].filter(t => t.tempId !== item.tempId) }))}
+                                style={{
+                                  padding: '0.45rem 0.6rem',
+                                  background: 'transparent',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer'
+                                }}
+                                onMouseEnter={(e) => e.target.style.background = '#ffffff'}
+                                onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                              >
+                                <X style={{ width: '1rem', height: '1rem', color: '#6b7280' }} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {files[selectedDepartment.id]?.length > 0 ? (
                 files[selectedDepartment.id].map(file => (
@@ -235,6 +430,14 @@ const TenderWorkspace = () => {
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <p style={{ fontWeight: '500', color: '#1f2937', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</p>
                         <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: '0.25rem 0 0 0' }}>{file.size} • {file.uploadedAt}</p>
+                        {file.description && <p style={{ fontSize: '0.85rem', color: '#374151', margin: '0.5rem 0 0 0' }}><strong>Description:</strong> {file.description}</p>}
+                        {file.tags?.length > 0 && (
+                          <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {file.tags.map((t, idx) => (
+                              <span key={idx} style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderRadius: '999px', background: '#eef2ff', color: '#3730a3' }}>{t}</span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
@@ -366,21 +569,41 @@ const TenderWorkspace = () => {
                         <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: '0.25rem 0 0 0' }}>{task.createdAt}</p>
                       </div>
                     </div>
-                    <button
-                      onClick={() => deleteTask(selectedDepartment.id, task.id)}
-                      style={{ 
-                        padding: '0.5rem', 
-                        background: 'transparent', 
-                        border: 'none', 
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        transition: 'background 0.2s',
-                        flexShrink: 0
-                      }}
-                      onMouseEnter={(e) => e.target.style.background = '#ffffff'}
-                      onMouseLeave={(e) => e.target.style.background = 'transparent'}>
-                      <Trash2 style={{ width: '1rem', height: '1rem', color: '#dc2626' }} />
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
+                      {/* New Done button (green) with confirm -> remove on Yes */}
+                      <button
+                        onClick={() => handleTaskDone(selectedDepartment.id, task.id)}
+                        style={{
+                          padding: '0.5rem 0.75rem',
+                          background: '#059669',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                        }}
+                        onMouseEnter={(e) => e.target.style.background = '#047857'}
+                        onMouseLeave={(e) => e.target.style.background = '#059669'}
+                      >
+                        Done
+                      </button>
+
+                      <button
+                        onClick={() => deleteTask(selectedDepartment.id, task.id)}
+                        style={{ 
+                          padding: '0.5rem', 
+                          background: 'transparent', 
+                          border: 'none', 
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          transition: 'background 0.2s',
+                          flexShrink: 0
+                        }}
+                        onMouseEnter={(e) => e.target.style.background = '#ffffff'}
+                        onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                        <Trash2 style={{ width: '1rem', height: '1rem', color: '#dc2626' }} />
+                      </button>
+                    </div>
                   </div>
                 ))
               ) : (
