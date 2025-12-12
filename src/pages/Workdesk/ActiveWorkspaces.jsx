@@ -3,6 +3,8 @@
 
 import React, { useState } from "react";
 import "../../assets/css/ActiveWorkspaces.css";
+import WorkspaceOverview from "./WorkspaceOverview";
+
 
 const WorkdeskCard = ({ workspace }) => {
   return (
