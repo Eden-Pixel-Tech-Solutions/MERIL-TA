@@ -1,0 +1,291 @@
+/* =====================================================
+   NAVBAR THEME COLORS (BLUE + WHITE)
+===================================================== */
+:root {
+  --navbar-bg: #ffffff;
+  --navbar-accent: #2563eb;        /* Blue */
+  --navbar-accent-dark: #1e40af;   /* Dark Blue */
+  --navbar-text: #1f2937;          /* Almost Black */
+  --navbar-text-light: #6b7280;
+  --navbar-border: #e5e7eb;
+  --navbar-hover-bg: #f3f4f6;
+  --navbar-shadow: rgba(0, 0, 0, 0.08);
+  --navbar-height: 64px;
+  --navbar-transition: 0.25s ease;
+}
+
+/* =====================================================
+   GLOBAL RESET – REMOVE ALL BULLET POINTS
+===================================================== */
+.navbar-menu,
+.navbar-menu li,
+.navbar-dropdown,
+.navbar-dropdown li,
+.navbar-profile-dropdown,
+.navbar-profile-dropdown li {
+  list-style: none !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* =====================================================
+   NAVBAR CONTAINER
+===================================================== */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--navbar-bg);
+  height: var(--navbar-height);
+  padding: 0 1.75rem;
+  border-bottom: 1px solid var(--navbar-border);
+  box-shadow: 0 2px 8px var(--navbar-shadow);
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+/* =====================================================
+   BRAND TITLE
+===================================================== */
+.navbar-brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--navbar-accent);
+  cursor: pointer;
+}
+
+.navbar-logo-text {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--navbar-accent);
+  text-decoration: none;
+}
+
+.navbar-logo-text:hover {
+  color: var(--navbar-accent-dark);
+}
+
+/* =====================================================
+   HAMBURGER (MOBILE)
+===================================================== */
+.navbar-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.navbar-hamburger span {
+  width: 24px;
+  height: 3px;
+  background: var(--navbar-text);
+  border-radius: 2px;
+  transition: var(--navbar-transition);
+}
+
+.navbar-hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(4px, 6px);
+}
+.navbar-hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+.navbar-hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(4px, -6px);
+}
+
+/* =====================================================
+   NAVIGATION ITEMS
+===================================================== */
+.navbar-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.navbar-item {
+  position: relative;
+}
+
+.navbar-link {
+  background: none;
+  border: none;
+  color: var(--navbar-text);
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  transition: color var(--navbar-transition);
+}
+
+.navbar-link:hover {
+  color: var(--navbar-accent);
+}
+
+.dropdown-arrow {
+  font-size: 0.65rem;
+  transition: var(--navbar-transition);
+}
+
+.navbar-item:hover .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* =====================================================
+   DROPDOWN MENU
+===================================================== */
+.navbar-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--navbar-bg);
+  border: 1px solid var(--navbar-border);
+  border-radius: 6px;
+  min-width: 220px;
+  padding: 0.4rem 0;
+  box-shadow: 0 4px 12px var(--navbar-shadow);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: var(--navbar-transition);
+  z-index: 500;
+}
+
+.navbar-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.navbar-dropdown-item {
+  padding: 0.7rem 1.25rem;
+  font-size: 0.9rem;
+  color: var(--navbar-text);
+  text-decoration: none;
+  display: block;
+  transition: background-color var(--navbar-transition),
+              color var(--navbar-transition);
+}
+
+.navbar-dropdown-item:hover {
+  background: var(--navbar-hover-bg);
+  color: var(--navbar-accent);
+}
+
+/* =====================================================
+   PROFILE SECTION
+===================================================== */
+.navbar-profile {
+  position: relative;
+}
+
+.navbar-profile-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.navbar-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--navbar-accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.navbar-profile-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--navbar-bg);
+  border: 1px solid var(--navbar-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px var(--navbar-shadow);
+  width: 170px;
+  padding: 0.4rem 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: var(--navbar-transition);
+}
+
+.navbar-profile-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.navbar-profile-item {
+  padding: 0.7rem 1rem;
+  color: var(--navbar-text);
+  text-decoration: none;
+  display: block;
+  transition: background var(--navbar-transition), color var(--navbar-transition);
+}
+
+.navbar-profile-item:hover {
+  background: var(--navbar-hover-bg);
+  color: var(--navbar-accent);
+}
+
+/* =====================================================
+   MOBILE RESPONSIVENESS
+===================================================== */
+@media (max-width: 1024px) {
+  .navbar-hamburger {
+    display: flex;
+  }
+
+  .navbar-menu {
+    flex-direction: column;
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    right: 0;
+    background: var(--navbar-bg);
+    height: calc(100vh - var(--navbar-height));
+    padding: 1rem 0;
+    transform: translateX(-100%);
+    transition: transform var(--navbar-transition);
+  }
+
+  .navbar-menu.mobile-open {
+    transform: translateX(0);
+  }
+
+  .navbar-item {
+    width: 100%;
+    border-bottom: 1px solid var(--navbar-border);
+  }
+
+  .navbar-link {
+    width: 100%;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+  }
+
+  .navbar-dropdown {
+    position: static;
+    border: none;
+    box-shadow: none;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--navbar-transition);
+  }
+
+  .navbar-dropdown.active {
+    max-height: 600px;
+  }
+
+  .navbar-dropdown-item {
+    padding: 1rem 2.5rem;
+  }
+}
