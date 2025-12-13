@@ -10,6 +10,7 @@ import TendersPage from "./pages/Tenders/TendersPage";
 import InterestedPage from "./pages/Tenders/InterestedPage";
 import ArchivePage from "./pages/Tenders/ArchivePage";
 import CreateTenderPage from "./pages/Tenders/CreateTender";
+import TenderDetails from "./pages/Tenders/TenderDetails"; // ✅ added
 
 // Workdesk pages
 import ActiveWorkspaces from "./pages/Workdesk/ActiveWorkspaces";
@@ -32,15 +33,10 @@ import RiskScore from "./pages/Insights/RiskScore";
 
 // Dealers pages
 import Distributors from "./pages/Dealers/Distributors";
-//import OEMs from "./pages/Dealers/OEMs";
-//import PartnerPerformance from "./pages/Dealers/PartnerPerformance";
-//import ProductCatalogs from "./pages/Dealers/ProductCatalogs";
 
 /**
  * App.jsx
  * Main routing file for Meril Tenders.
- *
- * Ensure all imported files exist at the specified paths.
  * Default route: "/" -> "/tenders"
  */
 
@@ -62,36 +58,61 @@ function App() {
 
           {/* Tenders */}
           <Route path="/tenders" element={<TendersPage />} />
+          <Route path="/tenders/tenderdetails/:id" element={<TenderDetails />} />
+
           <Route path="/interested" element={<InterestedPage />} />
+          <Route
+            path="/interested/tenderdetails/:id"
+            element={<TenderDetails />}
+          />
+
           <Route path="/archive" element={<ArchivePage />} />
           <Route path="/create" element={<CreateTenderPage />} />
 
           {/* Tender Workdesk */}
-          <Route path="/workdesk/active-workspaces" element={<ActiveWorkspaces />} />
+          <Route
+            path="/workdesk/active-workspaces"
+            element={<ActiveWorkspaces />}
+          />
           <Route path="/workspace/:tenderId" element={<Workspaces />} />
 
           {/* Orders */}
           <Route path="/orders/gem-contracts" element={<GEMContracts />} />
           <Route path="/orders/work-orders" element={<WorkOrders />} />
           <Route path="/orders/po-tracking" element={<POTracking />} />
-          <Route path="/orders/billing-invoices" element={<BillingInvoices />} />
+          <Route
+            path="/orders/billing-invoices"
+            element={<BillingInvoices />}
+          />
 
           {/* Dealer Management */}
           <Route path="/dealers/distributors" element={<Distributors />} />
-          {/* <Route path="/dealers/oems" element={<OEMs />} /> */}
-          {/* <Route path="/dealers/partner-performance" element={<PartnerPerformance />} /> */}
-          {/* <Route path="/dealers/product-catalogs" element={<ProductCatalogs />} /> */}
 
           {/* Tender Insights */}
-          <Route path="/insights/winning-probability" element={<WinningProbability />} />
-          <Route path="/insights/competitor-analysis" element={<CompetitorAnalysis />} />
-          <Route path="/insights/product-suggestions" element={<ProductSuggestions />} />
-          <Route path="/insights/pricing-evaluation" element={<PricingEvaluation />} />
+          <Route
+            path="/insights/winning-probability"
+            element={<WinningProbability />}
+          />
+          <Route
+            path="/insights/competitor-analysis"
+            element={<CompetitorAnalysis />}
+          />
+          <Route
+            path="/insights/product-suggestions"
+            element={<ProductSuggestions />}
+          />
+          <Route
+            path="/insights/pricing-evaluation"
+            element={<PricingEvaluation />}
+          />
           <Route path="/insights/boq-insights" element={<BOQInsights />} />
-          <Route path="/insights/historical-comparison" element={<HistoricalComparison />} />
+          <Route
+            path="/insights/historical-comparison"
+            element={<HistoricalComparison />}
+          />
           <Route path="/insights/risk-score" element={<RiskScore />} />
 
-          {/* 404 Fallback */}
+          {/* 404 */}
           <Route
             path="*"
             element={
