@@ -4,8 +4,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../../assets/css/TendersPage.css';
 
-
-
+const itemsPerPage = 20;
+const ITEMS_PER_PAGE = 20;
 
 const DUMMY_STATUS_HISTORY = [
   { status: 'Proceed', remarks: 'Initial review completed', createdDate: '2025-01-15', updatedDate: '2025-01-15' },
@@ -25,6 +25,8 @@ const TenderStatusModal = ({ tender, onClose }) => {
     alert(`Status updated for Tender ${tender.T_ID}`);
     // In real app, you would update the backend here
   };
+
+
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -94,16 +96,53 @@ const TenderStatusModal = ({ tender, onClose }) => {
 };
 
 const TenderRow = ({ tender, serialNumber, onAction, onToggleInterest }) => {
-  const calculateDaysLeft = (endDate) => {
-    if (!endDate) return 0;
-    const end = new Date(endDate);
-    if (isNaN(end.getTime())) return 0;
-    const today = new Date();
-    const utc1 = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
-    const utc2 = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
-    const diffDays = Math.ceil((utc2 - utc1) / (1000 * 60 * 60 * 24));
+  const calculateDaysLeft = (endDateStr) => {
+    if (!endDateStr) return 0;
+
+    // Parse "DD-MM-YYYY hh:mm AM/PM"
+    const match = endDateStr.match(
+      /(\d{2})-(\d{2})-(\d{4}) (\d{1,2}):(\d{2}) (AM|PM)/i
+    );
+
+    if (!match) return 0;
+
+    let [, dd, mm, yyyy, hh, min, meridian] = match;
+
+    dd = Number(dd);
+    mm = Number(mm) - 1;
+    yyyy = Number(yyyy);
+    hh = Number(hh);
+    min = Number(min);
+
+    if (meridian.toUpperCase() === "PM" && hh !== 12) hh += 12;
+    if (meridian.toUpperCase() === "AM" && hh === 12) hh = 0;
+
+    // End date in IST
+    const endDate = new Date(Date.UTC(yyyy, mm, dd, hh - 5, min - 30));
+
+    // Current date in IST
+    const now = new Date();
+    const nowIST = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+
+    // Zero out time for day comparison
+    const startOfTodayIST = new Date(
+      nowIST.getFullYear(),
+      nowIST.getMonth(),
+      nowIST.getDate()
+    );
+
+    const startOfEndDayIST = new Date(
+      endDate.getFullYear(),
+      endDate.getMonth(),
+      endDate.getDate()
+    );
+
+    const diffMs = startOfEndDayIST - startOfTodayIST;
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
     return diffDays > 0 ? diffDays : 0;
   };
+
 
   const formatValue = (value) => {
     if (typeof value !== 'number' || isNaN(value)) return `₹ ${value}`;
@@ -120,7 +159,7 @@ const TenderRow = ({ tender, serialNumber, onAction, onToggleInterest }) => {
         <div className="tender-header-line">
           <b><div className="tender-serial" style={{ fontSize: "14pt" }}>{serialNumber}.</div></b>
 
-          <span className="tender-id-bold" style={{ fontSize: "14pt" }}>Tender Id - {tender.T_ID}</span>
+          <span className="tender-id-bold" style={{ fontSize: "14pt" }}>Tender Id: {tender.T_ID}</span>
           <span className="tender-value-bold" style={{ fontSize: "14pt" }}>{formatValue(tender.value)}</span>
           <b><span className="tender-date" style={{ fontSize: "14pt" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -236,26 +275,81 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         <span className="archive-remaining">Remaining pages: {remainingPages}</span>
       </div>
       <button
-        className="archive-btn-next"
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage >= totalPages}
-        aria-label="Next page"
       >
         Next
       </button>
+
     </div>
   );
 };
+
 
 export default function ArchivePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState('desc');
   const [tenders, setTenders] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
+    const fetchTenders = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+
+        const params = new URLSearchParams({
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+          sort: sortOrder,
+          archived: 'true',
+          search: searchKeyword
+        });
+
+        const res = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/tenders?${params.toString()}`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+
+        const data = await res.json();
+
+        setTenders(
+          (data.data || []).map(t => ({
+            T_ID: t.T_ID,
+            title: t.title,
+            department: t.department,
+            startDate: t.start_date,
+            endDate: t.end_date,
+            qty: Number(t.qty) || 0,
+            value: Number(t.value) || 0,
+            interested: t.interested,
+            location: '—',
+            state: '—',
+            emd: 0,
+            status: 'Closed'
+          }))
+        );
+
+        setTotalPages(
+          data.totalPages || Math.ceil((data.total || 0) / ITEMS_PER_PAGE)
+        );
+      } catch (err) {
+        console.error('Failed to fetch tenders', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+
+
+
     fetchTenders();
-  }, [currentPage, sortOrder]);
+  }, [currentPage]);
+
 
   const fetchTenders = async () => {
     try {
@@ -263,7 +357,7 @@ export default function ArchivePage() {
 
       const params = new URLSearchParams({
         page: currentPage,
-        limit: 10,
+        limit: 20,
         sort: sortOrder,
         archived: 'true', // archive page
         search: searchKeyword
@@ -298,7 +392,7 @@ export default function ArchivePage() {
       }));
 
       setTenders(mapped);
-      setTotalPages(Math.ceil(data.total / 10));
+      setTotalPages(Math.ceil(data.total / 20));
     } catch (err) {
       console.error('Failed to fetch tenders', err);
     }
@@ -324,7 +418,6 @@ export default function ArchivePage() {
   const [valueTo, setValueTo] = useState('');
   const [valueUnit, setValueUnit] = useState('Lakh');
 
-  const itemsPerPage = 10;
 
   const filteredTenders = useMemo(() => {
     return tenders.filter(tender => {
@@ -393,9 +486,6 @@ export default function ArchivePage() {
     });
     return sorted;
   }, [filteredTenders, sortOrder]);
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentTenders = sortedTenders.slice(startIndex, startIndex + itemsPerPage);
 
   const handleAction = (action, tenderData) => {
     if (action === 'status') {
@@ -587,15 +677,17 @@ export default function ArchivePage() {
       </div>
 
       <div className="tenders-list-compact">
-        {currentTenders.map((tender, index) => (
+        {tenders.map((tender, index) => (
           <TenderRow
             key={tender.T_ID}
             tender={tender}
-            serialNumber={startIndex + index + 1}
+            serialNumber={(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
             onAction={handleAction}
             onToggleInterest={handleToggleInterest}
           />
         ))}
+
+
       </div>
 
       {sortedTenders.length === 0 && (
