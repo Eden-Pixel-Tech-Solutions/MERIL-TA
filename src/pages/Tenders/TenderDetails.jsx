@@ -1,496 +1,519 @@
-// src/pages/Tenders/TenderDetails.jsx
-// Route: /tenders/tenderdetails/:id
-
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
 import '../../assets/css/TenderDetails.css';
 
-// Integration tip: in TendersPage.jsx wrap each tender row with Link to `/tenders/tenderdetails/${tender.id}`
-// e.g. <Link to={`/tenders/tenderdetails/${tender.id}`}> ...row content... </Link>
-
 const TenderDetails = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  // Accordion states
+  const [expandedSections, setExpandedSections] = useState({
+    tenderDetails: true,
+    keyValues: false,
+    keyDates: false,
+    eligibility: false,
+    products: false,
+    documents: false,
+    requiredDocs: false
+  });
 
-  // Dummy tender data
-  const tenders = [
-    {
-      id: 'T111',
-      name: 'Supply of Cardiac Stents and Surgical Equipment',
-      tenderId: 'TN2024-CARD-001',
-      state: 'Tamil Nadu',
-      referenceNumber: 'REF/TNMSC/2024/12345',
-      description: 'Procurement of high-quality cardiac stents, surgical sutures, and related cardiovascular equipment for government hospitals across Tamil Nadu. The tender includes delivery, installation, and training requirements.',
-      totalQuantity: '5000 units',
-      type: 'Medical Equipment',
-      category: 'Cardiovascular',
-      department: 'Tamil Nadu Medical Services Corporation',
-      location: 'Chennai, Tamil Nadu',
-      emdValue: '₹2,50,000',
-      estimatedCost: '₹1,25,00,000',
-      lastDate: '2025-01-15',
-      openingDate: '2025-01-16',
-      preBidDate: '2024-12-20',
-      authority: 'TNMSC',
-      documents: [
-        { name: 'Notice Inviting Tender (NIT).pdf', size: '2.3 MB' },
-        { name: 'Bill of Quantities (BOQ).xlsx', size: '856 KB' },
-        { name: 'Technical Specifications.pdf', size: '4.1 MB' },
-        { name: 'Terms and Conditions.pdf', size: '1.2 MB' }
-      ],
-      requiredDocs: [
-        'Company Registration Certificate',
-        'GST Registration Certificate',
-        'Technical Bid Document',
-        'Financial Bid Document',
-        'Experience Certificate (Last 3 Years)',
-        'ISO Certification',
-        'Product Sample Declaration'
-      ],
-      eligibility: [
-        'Minimum annual turnover of ₹50 lakhs in the last 3 financial years',
-        'At least 2 years of experience in medical equipment supply',
-        'Valid manufacturing license or authorized distributor certificate',
-        'ISO 13485 certification for medical devices',
-        'No blacklisting by any government organization'
-      ]
-    },
-    {
-      id: '2',
-      name: 'Orthopedic Implants and Instruments',
-      tenderId: 'TN2024-ORTH-002',
-      state: 'Karnataka',
-      referenceNumber: 'REF/KMSCL/2024/67890',
-      description: 'Supply of orthopedic implants including hip and knee replacements, bone screws, plates, and surgical instruments for district hospitals.',
-      totalQuantity: '3000 units',
-      type: 'Medical Equipment',
-      category: 'Orthopedics',
-      department: 'Karnataka Medical Supplies Corporation',
-      location: 'Bangalore, Karnataka',
-      emdValue: '₹1,80,000',
-      estimatedCost: '₹90,00,000',
-      lastDate: '2025-01-10',
-      openingDate: '2025-01-11',
-      preBidDate: '2024-12-18',
-      authority: 'KMSCL',
-      documents: [
-        { name: 'Tender Notice.pdf', size: '1.8 MB' },
-        { name: 'BOQ.xlsx', size: '642 KB' },
-        { name: 'Product Specifications.pdf', size: '3.5 MB' }
-      ],
-      requiredDocs: [
-        'Company Registration Certificate',
-        'GST Certificate',
-        'Technical Bid',
-        'Financial Bid',
-        'Experience Proof'
-      ],
-      eligibility: [
-        'Minimum turnover of ₹40 lakhs',
-        'Experience in orthopedic supplies',
-        'Valid certifications'
-      ]
-    }
+  // Modal states
+  const [showChangeProductModal, setShowChangeProductModal] = useState(false);
+  const [showAddDocumentModal, setShowAddDocumentModal] = useState(false);
+  const [showSuccessNotification, setShowSuccessNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+
+  // Feature button states
+  const [isInterested, setIsInterested] = useState(false);
+
+  // Form states
+  const [selectedProducts, setSelectedProducts] = useState([
+    { id: 1, oldProduct: 'TMT Bars', newProduct: 'TMT Bars' },
+    { id: 2, oldProduct: 'Cement', newProduct: 'Cement' },
+    { id: 3, oldProduct: 'Sand', newProduct: 'Sand' }
+  ]);
+
+  const [documentName, setDocumentName] = useState('');
+  const [department, setDepartment] = useState('');
+
+  // Dummy data
+  const tenderData = {
+    id: 'GEM/2025/B/6849781',
+    status: 'N/A',
+    referenceNo: '12435',
+    authority: 'Greater Hyderabad Municipal Corporation',
+    brief: 'Construction Of 6 Lane Bi Directions Flyover Crossing Tkr College Junction, Gayathri Nagar Junction And Mandallammu Junction.'
+  };
+
+  const productsList = [
+    'TMT Bars', 'Cement', 'Sand', 'Aggregates', 'Steel Pipes', 'Paint', 'Wood', 'Bricks', 'Tiles', 'Glass'
   ];
 
-  const tender = tenders.find(t => t.id === id);
+  const departments = [
+    'Civil Engineering', 'Electrical', 'Mechanical', 'Architecture', 'Finance', 'Administration'
+  ];
 
-  const [isInterested, setIsInterested] = useState(false);
-  const [tenderStatus, setTenderStatus] = useState('Not Set');
-  const [showReminderModal, setShowReminderModal] = useState(false);
-  const [showStatusMenu, setShowStatusMenu] = useState(false);
-  const [reminderData, setReminderData] = useState({ date: '', time: '', notes: '' });
-  const [uploadedDocs, setUploadedDocs] = useState({});
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+  const documents = [
+    { name: 'NIT', link: '#' },
+    { name: 'Technical Specifications', link: '#' },
+    { name: 'Financial Bid Format', link: '#' },
+    { name: 'Terms & Conditions', link: '#' }
+  ];
 
-  useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => setShowToast(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [showToast]);
+  const eligibilityCriteria = [
+    'The bidder should have completed similar works in last 5 years',
+    'Minimum annual turnover of Rs. 50 Crores in last 3 financial years',
+    'Valid contractor license and registration',
+    'GST registration certificate',
+    'Experience in flyover construction projects'
+  ];
 
-  if (!tender) {
-    return (
-      <div className="tender-not-found">
-        <div className="not-found-content">
-          <h2>Tender Not Found</h2>
-          <p>The tender you're looking for doesn't exist or has been removed.</p>
-          <button onClick={() => navigate('/tenders')} className="btn-back">
-            ← Back to Tenders
-          </button>
-        </div>
-      </div>
+  // Toggle accordion sections
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  // Handle Proceed button
+  const handleProceed = () => {
+    setNotificationMessage('Products confirmed successfully');
+    setShowSuccessNotification(true);
+    setTimeout(() => {
+      setShowSuccessNotification(false);
+    }, 3000);
+  };
+
+  // Handle product change in modal
+  const handleProductChange = (id, newProduct) => {
+    setSelectedProducts(prev =>
+      prev.map(p => p.id === id ? { ...p, newProduct } : p)
     );
-  }
-
-  const calculateDaysLeft = (dateString) => {
-    const targetDate = new Date(dateString);
-    const today = new Date();
-    const diffTime = targetDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
   };
 
-  const daysLeft = calculateDaysLeft(tender.lastDate);
-
-  const handleInterestToggle = () => {
-    const newState = !isInterested;
-    setIsInterested(newState);
-    console.log('toggle interested', id, newState);
+  // Save product changes
+  const saveProductChanges = () => {
+    setShowChangeProductModal(false);
+    setNotificationMessage('Products updated successfully');
+    setShowSuccessNotification(true);
+    setTimeout(() => {
+      setShowSuccessNotification(false);
+    }, 3000);
   };
 
-  const handleReminderSave = () => {
-    console.log('Reminder saved:', { tenderId: id, ...reminderData });
-    setToastMessage('Reminder set successfully!');
-    setShowToast(true);
-    setShowReminderModal(false);
-    setReminderData({ date: '', time: '', notes: '' });
-  };
-
-  const handleStatusChange = (status) => {
-    setTenderStatus(status);
-    setShowStatusMenu(false);
-    setToastMessage(`Status changed to: ${status}`);
-    setShowToast(true);
-    console.log('Status changed:', { tenderId: id, status });
-  };
-
-  const handleDocumentDownload = (docName) => {
-    console.log('Download document:', docName);
-  };
-
-  const handleDownloadAll = () => {
-    console.log('Download all documents:', tender.documents.map(d => d.name));
-    setToastMessage('Downloading all documents...');
-    setShowToast(true);
-  };
-
-  const handleDocUpload = (docName) => {
-    console.log('Upload document:', docName);
-    setUploadedDocs(prev => ({ ...prev, [docName]: true }));
-  };
-
-  const handleMarkAllReady = () => {
-    const allDocs = {};
-    tender.requiredDocs.forEach(doc => {
-      allDocs[doc] = true;
-    });
-    setUploadedDocs(allDocs);
-    setToastMessage('All documents marked as ready!');
-    setShowToast(true);
-  };
-
-  const handleCheckEligibility = () => {
-    console.log('Checking eligibility for tender:', id);
-    setToastMessage('Eligibility check: All criteria met ✓');
-    setShowToast(true);
-  };
-
-  const handleQuickAction = (action) => {
-    console.log('Quick action:', action);
-    setToastMessage(`Action: ${action}`);
-    setShowToast(true);
+  // Handle document submission
+  const handleAddDocument = () => {
+    if (documentName && department) {
+      setShowAddDocumentModal(false);
+      setNotificationMessage('Document added successfully');
+      setShowSuccessNotification(true);
+      setDocumentName('');
+      setDepartment('');
+      setTimeout(() => {
+        setShowSuccessNotification(false);
+      }, 3000);
+    }
   };
 
   return (
-    <div className="tender-details-page">
-      {/* Header */}
-      <div className="tender-header">
-        <div className="header-left">
-          <button onClick={() => navigate(-1)} className="btn-back" aria-label="Go back to tenders list">
-            ← Back
-          </button>
-          <div className="header-title">
-            <h1>Tender Details</h1>
-            <p className="tender-subtitle">{tender.name}</p>
-          </div>
+    <div className="tender-details-container">
+      {/* Success Notification */}
+      {showSuccessNotification && (
+        <div className="success-notification">
+          <span className="success-icon">✓</span>
+          {notificationMessage}
         </div>
+      )}
+
       
-      </div>
 
-      {/* Main Content */}
-      <div className="tender-content">
-        <div className="main-column">
-          {/* General Details */}
-          <div className="card">
-            <h2>General Details</h2>
-            <div className="details-grid">
-              <div className="detail-item">
-                <label>Tender ID</label>
-                <span>{tender.tenderId}</span>
-              </div>
-              <div className="detail-item">
-                <label>State</label>
-                <span>{tender.state}</span>
-              </div>
-              <div className="detail-item">
-                <label>Reference Number</label>
-                <span>{tender.referenceNumber}</span>
-              </div>
-              <div className="detail-item">
-                <label>Type / Category</label>
-                <span>{tender.type} / {tender.category}</span>
-              </div>
-              <div className="detail-item full-width">
-                <label>Description</label>
-                <span>{tender.description}</span>
-              </div>
-              <div className="detail-item">
-                <label>Total Quantity</label>
-                <span>{tender.totalQuantity}</span>
-              </div>
-              <div className="detail-item">
-                <label>Department</label>
-                <span>{tender.department}</span>
-              </div>
-              <div className="detail-item">
-                <label>Location</label>
-                <span>{tender.location}</span>
-              </div>
+      <div className="content-wrapper">
+        {/* Left Content */}
+        <div className="left-content">
+          
+          {/* Tender Details Section */}
+          <div className="accordion-section">
+            <div 
+              className="accordion-header"
+              onClick={() => toggleSection('tenderDetails')}
+            >
+              <h2>Tender Details</h2>
+              <span className={`arrow ${expandedSections.tenderDetails ? 'expanded' : ''}`}>
+                ^
+              </span>
             </div>
+            {expandedSections.tenderDetails && (
+              <div className="accordion-content">
+                <div className="details-grid-horizontal">
+                  <div className="detail-item-left">
+                    <label>Tender ID</label>
+                    <p>{tenderData.id}</p>
+                  </div>
+                  <div className="detail-item-left">
+                    <label>Tender Status</label>
+                    <p>{tenderData.status}</p>
+                  </div>
+                  <div className="detail-item-left">
+                    <label>Reference No.</label>
+                    <p>{tenderData.referenceNo || '-'}</p>
+                  </div>
+                  <div className="detail-item-left">
+                    <label>Tender Authority</label>
+                    <p>{tenderData.authority}</p>
+                  </div>
+                </div>
+                <div className="detail-item-full">
+                  <label>Website</label>
+                  <p>Please Refer Tender Documents</p>
+                </div>
+                <div className="detail-item-full">
+                  <label>Brief</label>
+                  <p>{tenderData.brief}</p>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Key Dates & Values */}
-          <div className="card">
-            <h2>Key Dates & Values</h2>
-            <div className="key-info-grid">
-              <div className="key-section">
-                <h3>Key Values</h3>
-                <div className="key-items">
-                  <div className="key-item">
-                    <label>EMD Value</label>
-                    <span className="value">{tender.emdValue}</span>
+          {/* Key Values Section */}
+          <div className="accordion-section">
+            <div 
+              className="accordion-header"
+              onClick={() => toggleSection('keyValues')}
+            >
+              <h2>Key Values *</h2>
+              <span className={`arrow ${expandedSections.keyValues ? 'expanded' : ''}`}>
+                ^
+              </span>
+            </div>
+            {expandedSections.keyValues && (
+              <div className="accordion-content">
+                <div className="key-values-row">
+                  <div className="detail-item-left">
+                    <label>Document Fees</label>
+                    <p>Refer Document</p>
                   </div>
-                  <div className="key-item">
+                  <div className="detail-item-left">
+                    <label>Earnest Money Deposit (EMD)</label>
+                    <p>Refer Document</p>
+                  </div>
+                  <div className="detail-item-left">
                     <label>Estimated Cost</label>
-                    <span className="value highlight">{tender.estimatedCost}</span>
+                    <p>₹ 418.00 CR.</p>
                   </div>
                 </div>
               </div>
-              <div className="key-section">
-                <h3>Key Dates</h3>
-                <div className="key-items">
-                  <div className="key-item">
-                    <label>Pre-bid Meeting</label>
-                    <span className="value">{new Date(tender.preBidDate).toLocaleDateString('en-GB')}</span>
+            )}
+          </div>
+
+          {/* Key Dates Section */}
+          <div className="accordion-section">
+            <div 
+              className="accordion-header"
+              onClick={() => toggleSection('keyDates')}
+            >
+              <h2>Key Dates *</h2>
+              <span className={`arrow ${expandedSections.keyDates ? 'expanded' : ''}`}>
+                ^
+              </span>
+            </div>
+            {expandedSections.keyDates && (
+              <div className="accordion-content">
+                <div className="details-grid-horizontal">
+                  <div className="detail-item-left">
+                    <label>Start Date Of Document Collection</label>
+                    <p>Refer Document</p>
                   </div>
-                  <div className="key-item">
-                    <label>Last Date for Submission</label>
-                    <span className="value">{new Date(tender.lastDate).toLocaleDateString('en-GB')}</span>
+                  <div className="detail-item-left">
+                    <label>Last Date For Submission</label>
+                    <p>20-12-2025</p>
                   </div>
-                  <div className="key-item">
+                  <div className="detail-item-left">
                     <label>Opening Date</label>
-                    <span className="value">{new Date(tender.openingDate).toLocaleDateString('en-GB')}</span>
+                    <p>20-12-2025</p>
+                  </div>
+                  <div className="detail-item-left">
+                    <label>Pre Bid Date</label>
+                    <p>Refer Document</p>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Suggested Products */}
-          <div className="card">
-            <h2>Suggested Products</h2>
-            <div className="suggested-products">
-              <ul>
-                <li>Recommend <strong>Meril Sutures V3</strong> for cardiovascular procedures — quantity estimate based on tender value and typical usage patterns.</li>
-                <li>Consider <strong>Premium Cardiac Stents</strong> with drug-eluting coating for improved patient outcomes.</li>
-                <li>Include <strong>Surgical Kit Bundle</strong> containing essential instruments for complete cardiovascular procedures.</li>
-              </ul>
-              <div className="product-actions">
-                <button className="btn-primary" onClick={() => handleQuickAction('Add to Catalog')}>
-                  Add to Catalog
-                </button>
-                <Link to="#" className="link-secondary">View Product Suggestions →</Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Tender Documents */}
-          <div className="card">
-            <h2>Tender Documents</h2>
-            <div className="documents-list" role="table" aria-label="Tender documents">
-              {tender.documents.map((doc, index) => (
-                <div key={index} className="document-item" role="row">
-                  <span className="doc-icon" aria-hidden="true">📄</span>
-                  <div className="doc-info">
-                    <span className="doc-name">{doc.name}</span>
-                    <span className="doc-size">{doc.size}</span>
-                  </div>
-                  <div className="doc-actions">
-                    <button
-                      onClick={() => handleDocumentDownload(doc.name)}
-                      className="btn-link"
-                      aria-label={`Download ${doc.name}`}
-                    >
-                      Download
-                    </button>
-                    <button
-                      onClick={() => window.open('#', '_blank')}
-                      className="btn-link"
-                      aria-label={`View ${doc.name}`}
-                    >
-                      View
-                    </button>
-                  </div>
+                <div className="disclaimer">
+                  *The Estimated Cost Value & Dates Are Indicative Only. Please Read Tender Document For Accurate Information.
                 </div>
-              ))}
-            </div>
-            <button className="btn-secondary" onClick={handleDownloadAll}>
-              Download All Documents
-            </button>
+              </div>
+            )}
           </div>
 
-          {/* Documents Required */}
-          <div className="card">
-            <h2>Documents Required to Participate</h2>
-            <div className="required-docs-list">
-              {tender.requiredDocs.map((doc, index) => (
-                <div key={index} className="required-doc-item">
-                  <input
-                    type="checkbox"
-                    id={`doc-${index}`}
-                    checked={uploadedDocs[doc] || false}
-                    onChange={() => setUploadedDocs(prev => ({ ...prev, [doc]: !prev[doc] }))}
-                    aria-label={`Mark ${doc} as ready`}
-                  />
-                  <label htmlFor={`doc-${index}`}>{doc}</label>
-                  <button
-                    className="btn-upload"
-                    onClick={() => handleDocUpload(doc)}
-                    aria-label={`Upload ${doc}`}
+          {/* Eligibility Criteria Section */}
+          <div className="accordion-section">
+            <div 
+              className="accordion-header"
+              onClick={() => toggleSection('eligibility')}
+            >
+              <h2>Eligibility Criteria</h2>
+              <span className={`arrow ${expandedSections.eligibility ? 'expanded' : ''}`}>
+                ^
+              </span>
+            </div>
+            {expandedSections.eligibility && (
+              <div className="accordion-content">
+                <ul className="eligibility-list">
+                  {eligibilityCriteria.map((criteria, index) => (
+                    <li key={index}>{criteria}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Suggested Products Section */}
+          <div className="accordion-section">
+            <div 
+              className="accordion-header"
+              onClick={() => toggleSection('products')}
+            >
+              <h2>Suggested Products</h2>
+              <span className={`arrow ${expandedSections.products ? 'expanded' : ''}`}>
+                ^
+              </span>
+            </div>
+            {expandedSections.products && (
+              <div className="accordion-content">
+                <ul className="products-list">
+                  {selectedProducts.map(product => (
+                    <li key={product.id}>{product.newProduct}</li>
+                  ))}
+                </ul>
+                <div className="products-actions-bottom">
+                  <button className="btn-proceed" onClick={handleProceed}>
+                    Proceed
+                  </button>
+                  <button 
+                    className="btn-change" 
+                    onClick={() => setShowChangeProductModal(true)}
                   >
-                    Upload
+                    Change Product
                   </button>
                 </div>
-              ))}
-            </div>
-            <button className="btn-secondary" onClick={handleMarkAllReady}>
-              Mark All Ready
-            </button>
+              </div>
+            )}
           </div>
 
-          {/* Eligibility Criteria */}
-          <div className="card">
-            <h2>Eligibility Criteria</h2>
-            <ul className="eligibility-list">
-              {tender.eligibility.map((criterion, index) => (
-                <li key={index}>{criterion}</li>
-              ))}
-            </ul>
-            <button className="btn-secondary" onClick={handleCheckEligibility}>
-              Check Eligibility
-            </button>
+          {/* Tender Documents Section */}
+          <div className="accordion-section">
+            <div 
+              className="accordion-header"
+              onClick={() => toggleSection('documents')}
+            >
+              <h2>Tender Document</h2>
+              <span className={`arrow ${expandedSections.documents ? 'expanded' : ''}`}>
+                ^
+              </span>
+            </div>
+            {expandedSections.documents && (
+              <div className="accordion-content">
+                <div className="documents-list">
+                  {documents.map((doc, index) => (
+                    <div key={index} className="document-row">
+                      <span>{doc.name}</span>
+                      <button className="btn-download">Download</button>
+                    </div>
+                  ))}
+                </div>
+                <a href="#" className="download-all-link">
+                  Click Here (Download All Tender Documents)
+                </a>
+              </div>
+            )}
           </div>
+
+          {/* Required Documents Section */}
+          <div className="accordion-section">
+            <div 
+              className="accordion-header"
+              onClick={() => toggleSection('requiredDocs')}
+            >
+              <h2>Required Documents To Participate</h2>
+              <span className={`arrow ${expandedSections.requiredDocs ? 'expanded' : ''}`}>
+                ^
+              </span>
+            </div>
+            {expandedSections.requiredDocs && (
+              <div className="accordion-content">
+                <div className="required-docs-header">
+                  <button 
+                    className="btn-add-document"
+                    onClick={() => setShowAddDocumentModal(true)}
+                  >
+                    Add Document
+                  </button>
+                </div>
+                <ul className="required-docs-list">
+                  <li>Valid Contractor License</li>
+                  <li>GST Registration Certificate</li>
+                  <li>PAN Card</li>
+                  <li>Company Registration Certificate</li>
+                  <li>Previous Work Experience Certificates</li>
+                </ul>
+              </div>
+            )}
+          </div>
+
         </div>
 
-        {/* Sidebar */}
-        <aside className="sidebar">
-          <div className="sidebar-card">
-            <h3 className="sidebar-title">TENDER FEATURES</h3>
-            <div className="sidebar-actions">
-              <button
-                className={`sidebar-action ${isInterested ? 'active' : ''}`}
-                onClick={handleInterestToggle}
-              >
-                <span className="icon">{isInterested ? '❤️' : '🤍'}</span>
-                <span>Interested</span>
-              </button>
-              <button className="sidebar-action" onClick={() => setShowReminderModal(true)}>
-                <span className="icon">🔔</span>
-                <span>Set Reminder</span>
-              </button>
-              <button className="sidebar-action" onClick={() => handleQuickAction('Download NIT')}>
-                <span className="icon">📥</span>
-                <span>Download NIT</span>
-              </button>
-              <button className="sidebar-action" onClick={() => handleQuickAction('View BOQ')}>
-                <span className="icon">📊</span>
-                <span>View BOQ</span>
-              </button>
-              <button className="sidebar-action" onClick={() => handleQuickAction('Share')}>
-                <span className="icon">🔗</span>
-                <span>Share</span>
-              </button>
+        {/* Right Sidebar - Fixed */}
+        <div className="right-sidebar">
+          
+          {/* Tender Features Panel */}
+          <div className="features-panel">
+            <h3>TENDER FEATURES</h3>
+            <button 
+              className={`feature-btn ${isInterested ? 'active' : ''}`}
+              onClick={() => setIsInterested(!isInterested)}
+            >
+              <span className="icon">♡</span>
+              Interested
+            </button>
+            <button className="feature-btn">
+              <span className="icon">⏰</span>
+              Set Reminder
+            </button>
+            <button className="feature-btn">
+              <span className="icon">⬇</span>
+              Download NIT
+            </button>
+            <button className="feature-btn">
+              <span className="icon">📄</span>
+              View BOQ
+            </button>
+            <button className="feature-btn">
+              <span className="icon">↗</span>
+              Share
+            </button>
+          </div>
+
+          {/* Quick Info Panel */}
+          <div className="quick-info-panel">
+            <div className="info-item">
+              <label>Estimated Cost</label>
+              <p>₹ 418.00 CR.</p>
             </div>
-            <div className="sidebar-summary">
-              <div className="summary-item">
-                <label>Estimated Cost</label>
-                <span className="value">{tender.estimatedCost}</span>
-              </div>
-              <div className="summary-item">
-                <label>Days Left</label>
-                <span className="value days">{daysLeft} days</span>
-              </div>
-              <div className="summary-item">
-                <label>Tender Authority</label>
-                <span className="value">{tender.authority}</span>
-              </div>
+            <div className="info-item">
+              <label>Days Left</label>
+              <p className="days-highlight">7 Days</p>
             </div>
           </div>
-        </aside>
+
+        </div>
       </div>
 
-      {/* Reminder Modal */}
-      {showReminderModal && (
-        <div className="modal-overlay" onClick={() => setShowReminderModal(false)}>
-          <div
-            className="modal-content"
-            onClick={e => e.stopPropagation()}
-            role="dialog"
-            aria-labelledby="reminder-modal-title"
-            aria-modal="true"
-          >
-            <h3 id="reminder-modal-title">Set Reminder</h3>
+      {/* Change Product Modal */}
+      {showChangeProductModal && (
+        <div className="modal-overlay" onClick={() => setShowChangeProductModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Change Products</h2>
+              <button 
+                className="modal-close"
+                onClick={() => setShowChangeProductModal(false)}
+              >
+                ×
+              </button>
+            </div>
             <div className="modal-body">
-              <div className="form-group">
-                <label htmlFor="reminder-date">Date</label>
-                <input
-                  type="date"
-                  id="reminder-date"
-                  value={reminderData.date}
-                  onChange={e => setReminderData(prev => ({ ...prev, date: e.target.value }))}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="reminder-time">Time</label>
-                <input
-                  type="time"
-                  id="reminder-time"
-                  value={reminderData.time}
-                  onChange={e => setReminderData(prev => ({ ...prev, time: e.target.value }))}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="reminder-notes">Notes</label>
-                <textarea
-                  id="reminder-notes"
-                  rows="3"
-                  value={reminderData.notes}
-                  onChange={e => setReminderData(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Add any notes..."
-                ></textarea>
-              </div>
+              <table className="products-table">
+                <thead>
+                  <tr>
+                    <th>S.No</th>
+                    <th>Old Product</th>
+                    <th>New Product</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedProducts.map((product, index) => (
+                    <tr key={product.id}>
+                      <td>{index + 1}</td>
+                      <td>{product.oldProduct}</td>
+                      <td>
+                        <select
+                          value={product.newProduct}
+                          onChange={(e) => handleProductChange(product.id, e.target.value)}
+                          className="product-select"
+                        >
+                          {productsList.map((p, i) => (
+                            <option key={i} value={p}>{p}</option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
             <div className="modal-footer">
-              <button className="btn-secondary" onClick={() => setShowReminderModal(false)}>
-                Cancel
+              <button className="btn-save" onClick={saveProductChanges}>
+                Save
               </button>
-              <button className="btn-primary" onClick={handleReminderSave}>
-                Save Reminder
+              <button 
+                className="btn-cancel"
+                onClick={() => setShowChangeProductModal(false)}
+              >
+                Close
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Toast Notification */}
-      {showToast && (
-        <div className="toast" role="alert" aria-live="polite">
-          {toastMessage}
+      {/* Add Document Modal */}
+      {showAddDocumentModal && (
+        <div className="modal-overlay" onClick={() => setShowAddDocumentModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Add Document</h2>
+              <button 
+                className="modal-close"
+                onClick={() => setShowAddDocumentModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>Document Name *</label>
+                  <input
+                    type="text"
+                    value={documentName}
+                    onChange={(e) => setDocumentName(e.target.value)}
+                    placeholder="Enter document name"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Department *</label>
+                  <select
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
+                  >
+                    <option value="">Select Department</option>
+                    {departments.map((dept, i) => (
+                      <option key={i} value={dept}>{dept}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button className="btn-save" onClick={handleAddDocument}>
+                  Submit
+                </button>
+                <button 
+                  className="btn-cancel"
+                  onClick={() => setShowAddDocumentModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
+
     </div>
   );
 };
