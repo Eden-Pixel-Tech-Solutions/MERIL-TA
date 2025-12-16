@@ -39,17 +39,20 @@ const Navbar = () => {
       ],
     },
     {
-      label: "Tender Insights",
-      items: [
-        { name: "Winning Probability", path: "/insights/winning-probability" },
-        { name: "Competitor Analysis", path: "/insights/competitor-analysis" },
-        { name: "Product Suggestions", path: "/insights/product-suggestions" },
-        { name: "Pricing Evaluation", path: "/insights/pricing-evaluation" },
-        { name: "BOQ Insights", path: "/insights/boq-insights" },
-        { name: "Historical Comparison", path: "/insights/historical-comparison" },
-        { name: "Risk Score", path: "/insights/risk-score" },
-      ],
-    },
+  label: "Tender Insights",
+  items: [
+    { name: "Winning Probability", path: "/insights/winning-probability" },
+    { name: "Competitor Analysis", path: "/insights/competitor-analysis" },
+    { name: "Competitor Profile", path: "/insights/CompetitorProfile" }, 
+    { name: "Product Suggestions", path: "/insights/product-suggestions" },
+    { name: "Pricing Evaluation", path: "/insights/pricing-evaluation" },
+    { name: "BOQ Insights", path: "/insights/boq-insights" },
+    { name: "Historical Comparison", path: "/insights/historical-comparison" },
+    { name: "Company Profile", path: "/insights/Company-Profile" },
+    { name: "Compare Bidders", path: "/insights/Compare-Bidders" },
+  ],
+},
+
     {
       label: "Tender Workdesk",
       items: [
@@ -70,7 +73,7 @@ const Navbar = () => {
       label: "Dealer Management",
       items: [
         { name: "Dealers", path: "/dealers/distributors" },
-        { name: "OEMs", path: "/dealers/oems" },
+        { name: "OEMs", path: "/dealers/OEMs" },
         { name: "Partner Performance", path: "/dealers/partner-performance" },
         { name: "Product Catalogs", path: "/dealers/product-catalogs" },
       ],

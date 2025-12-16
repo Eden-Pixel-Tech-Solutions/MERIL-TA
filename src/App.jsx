@@ -24,14 +24,18 @@ import BillingInvoices from "./pages/Orders/BillingInvoices";
 // Insights pages
 import WinningProbability from "./pages/Insights/WinningProbability";
 import CompetitorAnalysis from "./pages/Insights/CompetitorAnalysis";
+import CompetitorProfile from "./pages/Insights/CompetitorProfile";
 import ProductSuggestions from "./pages/Insights/ProductSuggestions";
 import PricingEvaluation from "./pages/Insights/PricingEvaluation";
 import BOQInsights from "./pages/Insights/BOQInsights";
 import HistoricalComparison from "./pages/Insights/HistoricalComparison";
-import RiskScore from "./pages/Insights/RiskScore";
+import CompanyProfile from "./pages/Insights/CompanyProfile";
+import CompareBidders from "./pages/Insights/CompareBidders";
+
 
 // Dealers pages
 import Distributors from "./pages/Dealers/Distributors";
+import Oems from "./pages/Dealers/Oems";
 //import OEMs from "./pages/Dealers/OEMs";
 //import PartnerPerformance from "./pages/Dealers/PartnerPerformance";
 //import ProductCatalogs from "./pages/Dealers/ProductCatalogs";
@@ -78,18 +82,21 @@ function App() {
 
           {/* Dealer Management */}
           <Route path="/dealers/distributors" element={<Distributors />} />
-          {/* <Route path="/dealers/oems" element={<OEMs />} /> */}
+           <Route path="/dealers/oems" element={<Oems />} /> 
           {/* <Route path="/dealers/partner-performance" element={<PartnerPerformance />} /> */}
           {/* <Route path="/dealers/product-catalogs" element={<ProductCatalogs />} /> */}
 
           {/* Tender Insights */}
           <Route path="/insights/winning-probability" element={<WinningProbability />} />
           <Route path="/insights/competitor-analysis" element={<CompetitorAnalysis />} />
+          <Route path="/insights/CompetitorProfile" element={<CompetitorProfile />}/>
           <Route path="/insights/product-suggestions" element={<ProductSuggestions />} />
           <Route path="/insights/pricing-evaluation" element={<PricingEvaluation />} />
           <Route path="/insights/boq-insights" element={<BOQInsights />} />
           <Route path="/insights/historical-comparison" element={<HistoricalComparison />} />
-          <Route path="/insights/risk-score" element={<RiskScore />} />
+          <Route path="/insights/Company-Profile" element={<CompanyProfile />} />
+          <Route path="/insights/Compare-Bidders" element={<CompareBidders />} />
+        
 
           {/* 404 Fallback */}
           <Route

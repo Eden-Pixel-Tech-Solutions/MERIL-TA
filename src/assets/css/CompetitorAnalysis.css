@@ -1,241 +1,166 @@
-/* src/pages/Insights/CompetitorAnalysis.css */
+
+
 
 :root {
-  --blue: #2563eb;
-  --blue-dark: #1e40af;
+  --primary: #2563eb;
+  --primary-dark: #011c75;
   --text: #1f2937;
   --muted: #6b7280;
-  --bg: #ffffff;
-  --card-bg: #f8fafc;
   --border: #e5e7eb;
+  --bg: #ffffff;
+  --page-bg: #f3f6fb;
+  --card-bg: #ffffff;
 }
 
-.competitor-analysis-page {
-  padding: 2rem;
-  background-color: #f3f4f6;
+/* Page */
+.competitor-page {
+  padding: 24px;
+  background: var(--page-bg);
   min-height: 100vh;
-}
-
-.page-header {
-  margin-bottom: 2rem;
-}
-
-.page-header h1 {
-  font-size: 2rem;
   color: var(--text);
-  margin-bottom: 0.5rem;
 }
 
-.page-description {
-  color: var(--muted);
-  font-size: 0.95rem;
-  line-height: 1.5;
+/* Header */
+.competitor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
-.search-section {
-  margin-bottom: 1.5rem;
+.competitor-header h2 {
+  font-size: 22px;
+  font-weight: 700;
 }
 
-.search-input {
-  width: 100%;
-  padding: 0.875rem 1rem;
+.competitor-search {
+  width: 260px;
+  padding: 8px 12px;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.filters-bar {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-}
-
-.filter-dropdown {
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background-color: var(--bg);
-  color: var(--text);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.filter-dropdown:hover {
-  border-color: var(--blue);
-}
-
-.filter-dropdown:focus {
-  outline: none;
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.filter-btn {
-  padding: 0.75rem 1.5rem;
-  background-color: var(--blue);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.filter-btn:hover {
-  background-color: var(--blue-dark);
-  transform: translateY(-1px);
-}
-
-.insights-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
-}
-
-.competitor-card {
-  background-color: var(--bg);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-}
-
-.competitor-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
-}
-
-.card-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.card-icon {
-  font-size: 2rem;
-}
-
-.card-title-section {
-  flex: 1;
-}
-
-.card-title-section h3 {
-  font-size: 1.1rem;
-  color: var(--text);
-  margin-bottom: 0.5rem;
-  line-height: 1.4;
-}
-
-.category-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  background-color: var(--card-bg);
-  color: var(--blue);
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.card-body {
-  margin-bottom: 1.25rem;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-label {
-  font-size: 0.8rem;
-  color: var(--muted);
-  margin-bottom: 0.25rem;
-}
-
-.stat-value {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.strengths-box {
-  padding: 0.75rem;
-  background-color: var(--card-bg);
   border-radius: 6px;
+  outline: none;
 }
 
-.strengths-label {
-  font-size: 0.85rem;
+/* Card */
+.card {
+  background: var(--card-bg);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+/* Card Title */
+.card-title {
+  font-size: 15px;
   font-weight: 600;
-  color: var(--text);
-  display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 12px;
 }
 
-.strengths-box p {
-  font-size: 0.85rem;
-  color: var(--muted);
-  margin: 0;
-  line-height: 1.4;
+/* Filters */
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
 }
 
-.card-footer {
+.filter-grid input,
+.filter-grid select {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  outline: none;
+}
+
+.filter-actions {
+  margin-top: 12px;
   display: flex;
   justify-content: flex-end;
 }
 
-.view-details-btn {
-  padding: 0.625rem 1.25rem;
-  background-color: var(--blue);
-  color: white;
-  border: none;
+.btn-clear {
+  padding: 8px 18px;
   border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #f8fafc;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
 }
 
-.view-details-btn:hover {
-  background-color: var(--blue-dark);
-  transform: translateY(-1px);
+/* Tables */
+.table-wrapper {
+  overflow-x: auto;
 }
 
-@media (max-width: 768px) {
-  .competitor-analysis-page {
-    padding: 1rem;
-  }
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
 
-  .insights-grid {
+.data-table thead {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.data-table th,
+.data-table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.data-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.data-table.small th,
+.data-table.small td {
+  padding: 8px;
+}
+
+/* Center content */
+.center {
+  text-align: center;
+}
+
+/* Two Column Layout */
+.two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Remove Button */
+.remove-btn {
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* No Data */
+.no-data {
+  text-align: center;
+  padding: 16px;
+  color: var(--muted);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .two-column {
     grid-template-columns: 1fr;
   }
 
-  .filters-bar {
+  .competitor-header {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
 
-  .filter-dropdown,
-  .filter-btn {
+  .competitor-search {
     width: 100%;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
   }
 }

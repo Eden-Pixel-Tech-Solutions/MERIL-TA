@@ -1,174 +1,287 @@
-// src/pages/Insights/CompetitorAnalysis.jsx
-// Route: /insights/competitor-analysis
+import React, { useState } from "react";
+import "../../assets/css/CompetitorAnalysis.css";
 
-import React, { useState } from 'react';
-import '../../assets/css/CompetitorAnalysis.css';
+
+const DUMMY_DATA = [
+  {
+    name: "Gobind Industries Private Limited",
+    participated: 1921,
+    awarded: 0,
+    lost: 0,
+    tba: 1921,
+    state: "Delhi",
+    category: "Cardiology",
+    ownership: "Private",
+    date: "2023-06-12",
+  },
+  {
+    name: "Ojha Production",
+    participated: 1467,
+    awarded: 0,
+    lost: 0,
+    tba: 1467,
+    state: "Maharashtra",
+    category: "Orthopedics",
+    ownership: "Private",
+    date: "2023-04-20",
+  },
+  {
+    name: "Indicon Agro Industries LLP",
+    participated: 1455,
+    awarded: 0,
+    lost: 0,
+    tba: 1455,
+    state: "Tamil Nadu",
+    category: "Cardiology",
+    ownership: "Government",
+    date: "2023-02-10",
+  },
+];
 
 const CompetitorAnalysis = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedPeriod, setSelectedPeriod] = useState('6months');
+  const [search, setSearch] = useState("");
+  const [shortlisted, setShortlisted] = useState([]);
 
-  const competitors = [
-    {
-      id: 1,
-      name: 'MedTech Solutions Pvt Ltd',
-      category: 'Cardiac Devices',
-      marketShare: 34,
-      avgBidPrice: '₹42,00,000',
-      winRate: 68,
-      activeTenders: 12,
-      strengths: 'Strong pricing, established relationships',
-      icon: '🏢'
-    },
-    {
-      id: 2,
-      name: 'BioMed Industries',
-      category: 'Orthopedic Implants',
-      marketShare: 28,
-      avgBidPrice: '₹38,50,000',
-      winRate: 72,
-      activeTenders: 9,
-      strengths: 'Premium quality, innovative products',
-      icon: '🏭'
-    },
-    {
-      id: 3,
-      name: 'HealthCare Distributors',
-      category: 'Surgical Equipment',
-      marketShare: 22,
-      avgBidPrice: '₹31,00,000',
-      winRate: 55,
-      activeTenders: 15,
-      strengths: 'Wide distribution network',
-      icon: '🏪'
-    },
-    {
-      id: 4,
-      name: 'Advanced Medical Corp',
-      category: 'Diagnostic Systems',
-      marketShare: 41,
-      avgBidPrice: '₹65,00,000',
-      winRate: 79,
-      activeTenders: 7,
-      strengths: 'Technology leadership, R&D capabilities',
-      icon: '🔬'
-    },
-    {
-      id: 5,
-      name: 'PharmaSupply Co',
-      category: 'Medical Consumables',
-      marketShare: 19,
-      avgBidPrice: '₹22,00,000',
-      winRate: 61,
-      activeTenders: 18,
-      strengths: 'Cost efficiency, bulk supply',
-      icon: '📦'
-    }
-  ];
+  // ✅ NEW FILTER STATES (ADDED)
+  const [filters, setFilters] = useState({
+    state: "",
+    category: "",
+    ownership: "",
+    dateFrom: "",
+    dateTo: "",
+  });
 
-  const InsightCard = ({ competitor }) => {
-    return (
-      <div className="competitor-card">
-        <div className="card-header">
-          <span className="card-icon">{competitor.icon}</span>
-          <div className="card-title-section">
-            <h3>{competitor.name}</h3>
-            <span className="category-badge">{competitor.category}</span>
-          </div>
-        </div>
-        <div className="card-body">
-          <div className="stats-grid">
-            <div className="stat-item">
-              <span className="stat-label">Market Share</span>
-              <span className="stat-value">{competitor.marketShare}%</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Win Rate</span>
-              <span className="stat-value">{competitor.winRate}%</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Avg Bid Price</span>
-              <span className="stat-value">{competitor.avgBidPrice}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Active Tenders</span>
-              <span className="stat-value">{competitor.activeTenders}</span>
-            </div>
-          </div>
-          <div className="strengths-box">
-            <span className="strengths-label">Key Strengths:</span>
-            <p>{competitor.strengths}</p>
-          </div>
-        </div>
-        <div className="card-footer">
-          <button 
-            className="view-details-btn"
-            onClick={() => console.log('Viewing competitor:', competitor.name)}
-          >
-            View Full Analysis
-          </button>
-        </div>
-      </div>
+  // ✅ UPDATED FILTER LOGIC (EXTENDED, NOT REPLACED)
+  const filteredData = DUMMY_DATA.filter((item) => {
+    if (!item.name.toLowerCase().includes(search.toLowerCase())) return false;
+
+    if (filters.state && item.state !== filters.state) return false;
+    if (filters.category && item.category !== filters.category) return false;
+    if (filters.ownership && item.ownership !== filters.ownership) return false;
+
+    if (filters.dateFrom && new Date(item.date) < new Date(filters.dateFrom))
+      return false;
+    if (filters.dateTo && new Date(item.date) > new Date(filters.dateTo))
+      return false;
+
+    return true;
+  });
+
+  const toggleShortlist = (company) => {
+    setShortlisted((prev) =>
+      prev.includes(company)
+        ? prev.filter((c) => c !== company)
+        : [...prev, company]
     );
   };
 
   return (
-    <div className="competitor-analysis-page">
-      <div className="page-header">
-        <h1>Competitor Analysis</h1>
-        <p className="page-description">
-          Comprehensive insights into competitor performance, pricing strategies, and market positioning 
-          to help you make informed bidding decisions.
-        </p>
-      </div>
-
-      <div className="search-section">
+    <div className="competitor-page">
+      {/* Header */}
+      <div className="competitor-header">
+        <h2>Competitor Analysis</h2>
         <input
           type="text"
-          className="search-input"
-          placeholder="Search competitors by name or category..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Competitors Search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="competitor-search"
         />
       </div>
 
-      <div className="filters-bar">
-        <select 
-          className="filter-dropdown"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <option value="all">All Categories</option>
-          <option value="cardiac">Cardiac Devices</option>
-          <option value="orthopedic">Orthopedic Implants</option>
-          <option value="surgical">Surgical Equipment</option>
-          <option value="diagnostic">Diagnostic Systems</option>
-        </select>
+      {/* ✅ ADDED: COMPETITORS SEARCH FILTER PANEL */}
+      <div className="card">
+        <div className="filter-grid">
+          <select
+            value={filters.state}
+            onChange={(e) =>
+              setFilters({ ...filters, state: e.target.value })
+            }
+          >
+            <option value="">State</option>
+            <option>Delhi</option>
+            <option>Maharashtra</option>
+            <option>Tamil Nadu</option>
+          </select>
 
-        <select 
-          className="filter-dropdown"
-          value={selectedPeriod}
-          onChange={(e) => setSelectedPeriod(e.target.value)}
-        >
-          <option value="3months">Last 3 Months</option>
-          <option value="6months">Last 6 Months</option>
-          <option value="1year">Last Year</option>
-          <option value="2years">Last 2 Years</option>
-        </select>
+          <select
+            value={filters.category}
+            onChange={(e) =>
+              setFilters({ ...filters, category: e.target.value })
+            }
+          >
+            <option value="">Category</option>
+            <option>Cardiology</option>
+            <option>Orthopedics</option>
+          </select>
 
-        <button 
-          className="filter-btn"
-          onClick={() => console.log('Applying filters:', { selectedCategory, selectedPeriod })}
-        >
-          Apply Filters
-        </button>
+          <select
+            value={filters.ownership}
+            onChange={(e) =>
+              setFilters({ ...filters, ownership: e.target.value })
+            }
+          >
+            <option value="">Ownership</option>
+            <option>Private</option>
+            <option>Government</option>
+          </select>
+
+          <input
+            type="date"
+            value={filters.dateFrom}
+            onChange={(e) =>
+              setFilters({ ...filters, dateFrom: e.target.value })
+            }
+          />
+
+          <input
+            type="date"
+            value={filters.dateTo}
+            onChange={(e) =>
+              setFilters({ ...filters, dateTo: e.target.value })
+            }
+          />
+        </div>
+
+        <div className="filter-actions">
+          <button
+            className="btn-clear"
+            onClick={() =>
+              setFilters({
+                state: "",
+                category: "",
+                ownership: "",
+                dateFrom: "",
+                dateTo: "",
+              })
+            }
+          >
+            Clear Filters
+          </button>
+        </div>
       </div>
 
-      <div className="insights-grid">
-        {competitors.map((competitor) => (
-          <InsightCard key={competitor.id} competitor={competitor} />
-        ))}
+      {/* ================= BIDDERS ================= */}
+      <div className="card">
+        <div className="card-title">Bidders (1.42 Lac)</div>
+
+        <div className="table-wrapper">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Company Name</th>
+                <th>Participated Tender</th>
+                <th>Awarded Tender</th>
+                <th>Lost Tender</th>
+                <th>Result TBA</th>
+                <th>Shortlist</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.name}</td>
+                  <td>{item.participated}</td>
+                  <td>{item.awarded}</td>
+                  <td>{item.lost}</td>
+                  <td>{item.tba}</td>
+                  <td className="center">
+                    <input
+                      type="checkbox"
+                      checked={shortlisted.includes(item.name)}
+                      onChange={() => toggleShortlist(item.name)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ================= LOWER TABLES ================= */}
+      <div className="two-column">
+        {/* Competitor Companies */}
+        <div className="card">
+          <div className="card-title">
+            Competitors (Of I-Sourcing)
+          </div>
+
+          <div className="table-wrapper">
+            <table className="data-table small">
+              <thead>
+                <tr>
+                  <th>Company Name</th>
+                  <th>Participated</th>
+                  <th>Awarded</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredData.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.name}</td>
+                    <td>{item.participated}</td>
+                    <td>{item.awarded}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Shortlisted Companies */}
+        <div className="card">
+          <div className="card-title">
+            Shortlisted Competitors ({shortlisted.length})
+          </div>
+
+          <div className="table-wrapper">
+            <table className="data-table small">
+              <thead>
+                <tr>
+                  <th>Company Name</th>
+                  <th>Participated</th>
+                  <th>Awarded</th>
+                  <th>Lost</th>
+                  <th>Result TBA</th>
+                  <th>Remove</th>
+                </tr>
+              </thead>
+              <tbody>
+                {shortlisted.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="no-data">
+                      No shortlisted competitors
+                    </td>
+                  </tr>
+                ) : (
+                  shortlisted.map((name, index) => {
+                    const c = DUMMY_DATA.find(
+                      (item) => item.name === name
+                    );
+                    return (
+                      <tr key={index}>
+                        <td>{c.name}</td>
+                        <td>{c.participated}</td>
+                        <td>{c.awarded}</td>
+                        <td>{c.lost}</td>
+                        <td>{c.tba}</td>
+                        <td className="center">
+                          <button
+                            className="remove-btn"
+                            onClick={() => toggleShortlist(name)}
+                          >
+                            ✕
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -691,310 +691,287 @@ const GEMContracts = () => {
         </div>
 
         {/* Advanced Filters Panel */}
-        <div className={`filters-panel ${showFilters ? 'show' : ''}`}>
-          <div className="filters-grid">
-            <div className="filter-group">
-              <label htmlFor="referenceNo">Reference Number</label>
-              <input
-                id="referenceNo"
-                type="text"
-                value={filters.referenceNo}
-                onChange={(e) => setFilters({ ...filters, referenceNo: e.target.value })}
-              />
-            </div>
+        {/* Advanced Filters Panel */}
+<div className={`filters-panel ${showFilters ? 'show' : ''}`}>
 
-            <div className="filter-group">
-              <label htmlFor="state">State</label>
-              <select
-                id="state"
-                value={filters.state}
-                onChange={(e) => setFilters({ ...filters, state: e.target.value })}
-              >
-                {STATES.map(state => (
-                  <option key={state} value={state}>{state}</option>
-                ))}
-              </select>
-            </div>
+  <div className="filters-grid">
+    <div className="filter-group">
+      <label>Reference Number</label>
+      <input
+        type="text"
+        value={filters.referenceNo}
+        onChange={(e) => setFilters({ ...filters, referenceNo: e.target.value })}
+      />
+    </div>
 
-            <div className="filter-group">
-              <label htmlFor="city">City</label>
-              <input
-                id="city"
-                type="text"
-                value={filters.city}
-                onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-              />
-            </div>
+    <div className="filter-group">
+      <label>State</label>
+      <select
+        value={filters.state}
+        onChange={(e) => setFilters({ ...filters, state: e.target.value })}
+      >
+        {STATES.map(state => (
+          <option key={state} value={state}>{state}</option>
+        ))}
+      </select>
+    </div>
 
-            <div className="filter-group">
-              <label htmlFor="department">Department Name</label>
-              <input
-                id="department"
-                type="text"
-                value={filters.department}
-                onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-              />
-            </div>
+    <div className="filter-group">
+      <label>City</label>
+      <input
+        type="text"
+        value={filters.city}
+        onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+      />
+    </div>
 
-            <div className="filter-group">
-              <label htmlFor="tenderStatus">Tender Status</label>
-              <select
-                id="tenderStatus"
-                value={filters.tenderStatus}
-                onChange={(e) => setFilters({ ...filters, tenderStatus: e.target.value })}
-              >
-                <option value="All">All</option>
-                <option value="Open">Open</option>
-                <option value="Closed">Closed</option>
-                <option value="Awarded">Awarded</option>
-              </select>
-            </div>
+    <div className="filter-group">
+      <label>Department Name</label>
+      <input
+        type="text"
+        value={filters.department}
+        onChange={(e) => setFilters({ ...filters, department: e.target.value })}
+      />
+    </div>
 
-            <div className="filter-group">
-              <label htmlFor="tenderId">Tender ID</label>
-              <input
-                id="tenderId"
-                type="text"
-                value={filters.tenderId}
-                onChange={(e) => setFilters({ ...filters, tenderId: e.target.value })}
-              />
-            </div>
+    <div className="filter-group">
+      <label>Tender Status</label>
+      <select
+        value={filters.tenderStatus}
+        onChange={(e) => setFilters({ ...filters, tenderStatus: e.target.value })}
+      >
+        <option value="All">All</option>
+        <option value="Open">Open</option>
+        <option value="Closed">Closed</option>
+        <option value="Awarded">Awarded</option>
+      </select>
+    </div>
 
-            <div className="filter-group">
-              <label htmlFor="website">Website</label>
-              <input
-                id="website"
-                type="text"
-                value={filters.website}
-                onChange={(e) => setFilters({ ...filters, website: e.target.value })}
-              />
-            </div>
+    <div className="filter-group">
+      <label>Tender ID</label>
+      <input
+        type="text"
+        value={filters.tenderId}
+        onChange={(e) => setFilters({ ...filters, tenderId: e.target.value })}
+      />
+    </div>
 
-            <div className="filter-group">
-              <label htmlFor="closingDateFrom">Closing Date From</label>
-              <input
-                id="closingDateFrom" type="date"
-            value={filters.closingDateFrom}
-            onChange={(e) => setFilters({ ...filters, closingDateFrom: e.target.value })}
-          />
-        </div>
+    <div className="filter-group">
+      <label>Website</label>
+      <input
+        type="text"
+        value={filters.website}
+        onChange={(e) => setFilters({ ...filters, website: e.target.value })}
+      />
+    </div>
 
+    <div className="filter-group">
+      <label>Closing Date From</label>
+      <input
+        type="date"
+        value={filters.closingDateFrom}
+        onChange={(e) => setFilters({ ...filters, closingDateFrom: e.target.value })}
+      />
+    </div>
 
-        <div className="filter-group">
-          <label htmlFor="closingDateTo">Closing Date To</label>
-          <input
-            id="closingDateTo"
-            type="date"
-            value={filters.closingDateTo}
-            onChange={(e) => setFilters({ ...filters, closingDateTo: e.target.value })}
-          />
-        </div>
+    <div className="filter-group">
+      <label>Closing Date To</label>
+      <input
+        type="date"
+        value={filters.closingDateTo}
+        onChange={(e) => setFilters({ ...filters, closingDateTo: e.target.value })}
+      />
+    </div>
 
-        <div className="filter-group">
-          <label htmlFor="ownership">Ownership</label>
-          <select
-            id="ownership"
-            value={filters.ownership}
-            onChange={(e) => setFilters({ ...filters, ownership: e.target.value })}
-          >
-            <option value="All">All</option>
-            <option value="Government">Government</option>
-            <option value="Private">Private</option>
-          </select>
-        </div>
+    <div className="filter-group">
+      <label>Ownership</label>
+      <select
+        value={filters.ownership}
+        onChange={(e) => setFilters({ ...filters, ownership: e.target.value })}
+      >
+        <option value="All">All</option>
+        <option value="Government">Government</option>
+        <option value="Private">Private</option>
+      </select>
+    </div>
 
-        <div className="filter-group">
-          <label htmlFor="preBidDateFrom">Pre-bid Date From</label>
-          <input
-            id="preBidDateFrom"
-            type="date"
-            value={filters.preBidDateFrom}
-            onChange={(e) => setFilters({ ...filters, preBidDateFrom: e.target.value })}
-          />
-        </div>
+    <div className="filter-group">
+      <label>Pre-bid Date From</label>
+      <input
+        type="date"
+        value={filters.preBidDateFrom}
+        onChange={(e) => setFilters({ ...filters, preBidDateFrom: e.target.value })}
+      />
+    </div>
 
-        <div className="filter-group">
-          <label htmlFor="preBidDateTo">Pre-bid Date To</label>
-          <input
-            id="preBidDateTo"
-            type="date"
-            value={filters.preBidDateTo}
-            onChange={(e) => setFilters({ ...filters, preBidDateTo: e.target.value })}
-          />
-        </div>
+    <div className="filter-group">
+      <label>Pre-bid Date To</label>
+      <input
+        type="date"
+        value={filters.preBidDateTo}
+        onChange={(e) => setFilters({ ...filters, preBidDateTo: e.target.value })}
+      />
+    </div>
 
-        <div className="filter-group">
-          <label htmlFor="lastUpdated">Last Updated Date</label>
-          <input
-            id="lastUpdated"
-            type="text"
-            placeholder="YYYY-MM-DD"
-            value={filters.lastUpdated}
-            onChange={(e) => setFilters({ ...filters, lastUpdated: e.target.value })}
-          />
-        </div>
+    <div className="filter-group">
+      <label>Last Updated Date</label>
+      <input
+        type="text"
+        placeholder="YYYY-MM-DD"
+        value={filters.lastUpdated}
+        onChange={(e) => setFilters({ ...filters, lastUpdated: e.target.value })}
+      />
+    </div>
 
-        <div className="filter-group filter-group-qty">
-          <label>Quantity</label>
-          <div className="filter-compound">
-            <select
-              value={filters.qtyOperator}
-              onChange={(e) => setFilters({ ...filters, qtyOperator: e.target.value })}
-              aria-label="Quantity operator"
-            >
-              <option value=">=">&gt;=</option>
-              <option value="<=">&lt;=</option>
-              <option value="=">=</option>
-            </select>
-            <input
-              type="number"
-              placeholder="Value"
-              value={filters.qtyValue}
-              onChange={(e) => setFilters({ ...filters, qtyValue: e.target.value })}
-              aria-label="Quantity value"
-            />
-          </div>
-        </div>
-
-        <div className="filter-group filter-group-value">
-          <label>Tender Value</label>
-          <div className="filter-compound">
-            <select
-              value={filters.valueOperator}
-              onChange={(e) => setFilters({ ...filters, valueOperator: e.target.value })}
-              aria-label="Value operator"
-            >
-              <option value=">=">&gt;=</option>
-              <option value="<=">&lt;=</option>
-              <option value="=">=</option>
-            </select>
-            <input
-              type="number"
-              placeholder="From"
-              value={filters.valueFrom}
-              onChange={(e) => setFilters({ ...filters, valueFrom: e.target.value })}
-              aria-label="Value from"
-            />
-            <input
-              type="number"
-              placeholder="To"
-              value={filters.valueTo}
-              onChange={(e) => setFilters({ ...filters, valueTo: e.target.value })}
-              aria-label="Value to"
-            />
-            <select
-              value={filters.valueUnit}
-              onChange={(e) => setFilters({ ...filters, valueUnit: e.target.value })}
-              aria-label="Value unit"
-            >
-              <option value="Lakh">Lakh</option>
-              <option value="Crore">Crore</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div className="filters-row">
-        <div className="filter-radio-group">
-          <label>GeM / Non-GeM</label>
-          <div className="radio-options">
-            <label>
-              <input
-                type="radio"
-                name="gemType"
-                value="All"
-                checked={filters.gemType === 'All'}
-                onChange={(e) => setFilters({ ...filters, gemType: e.target.value })}
-              />
-              All
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="gemType"
-                value="GeM"
-                checked={filters.gemType === 'GeM'}
-                onChange={(e) => setFilters({ ...filters, gemType: e.target.value })}
-              />
-              GeM
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="gemType"
-                value="Non-GeM"
-                checked={filters.gemType === 'Non-GeM'}
-                onChange={(e) => setFilters({ ...filters, gemType: e.target.value })}
-              />
-              Non-GeM
-            </label>
-          </div>
-        </div>
-
-        <div className="filter-checkbox-group">
-          <label>
-            <input
-              type="checkbox"
-              checked={filters.isMsme}
-              onChange={(e) => setFilters({ ...filters, isMsme: e.target.checked })}
-            />
-            MSME
-          </label>
-        </div>
-
-        <div className="filter-radio-group">
-          <label>Startup</label>
-          <div className="radio-options">
-            <label>
-              <input
-                type="radio"
-                name="startupType"
-                value="All"
-                checked={filters.startupType === 'All'}
-                onChange={(e) => setFilters({ ...filters, startupType: e.target.value })}
-              />
-              All
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="startupType"
-                value="Yes"
-                checked={filters.startupType === 'Yes'}
-                onChange={(e) => setFilters({ ...filters, startupType: e.target.value })}
-              />
-              Yes
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="startupType"
-                value="No"
-                checked={filters.startupType === 'No'}
-                onChange={(e) => setFilters({ ...filters, startupType: e.target.value })}
-              />
-              No
-            </label>
-          </div>
-        </div>
-
-        <div className="filter-checkbox-group">
-          <label>
-            <input
-              type="checkbox"
-              checked={filters.isManualEntry}
-              onChange={(e) => setFilters({ ...filters, isManualEntry: e.target.checked })}
-            />
-            Manual Entry
-          </label>
-        </div>
-      </div>
-
-      <div className="filter-actions">
-        <button className="btn-search" onClick={handleSearch}>Search</button>
-        <button className="btn-clear" onClick={handleClearFilters}>Clear Filters</button>
+    <div className="filter-group">
+      <label>Quantity</label>
+      <div className="filter-compound">
+        <select
+          value={filters.qtyOperator}
+          onChange={(e) => setFilters({ ...filters, qtyOperator: e.target.value })}
+        >
+          <option value=">=">&gt;=</option>
+          <option value="<=">&lt;=</option>
+          <option value="=">=</option>
+        </select>
+        <input
+          type="number"
+          placeholder="Value"
+          value={filters.qtyValue}
+          onChange={(e) => setFilters({ ...filters, qtyValue: e.target.value })}
+        />
       </div>
     </div>
+
+    <div className="filter-group">
+      <label>Tender Value</label>
+      <div className="filter-compound">
+        <select
+          value={filters.valueOperator}
+          onChange={(e) => setFilters({ ...filters, valueOperator: e.target.value })}
+        >
+          <option value=">=">&gt;=</option>
+          <option value="<=">&lt;=</option>
+          <option value="=">=</option>
+        </select>
+        <input
+          type="number"
+          placeholder="From"
+          value={filters.valueFrom}
+          onChange={(e) => setFilters({ ...filters, valueFrom: e.target.value })}
+        />
+        <input
+          type="number"
+          placeholder="To"
+          value={filters.valueTo}
+          onChange={(e) => setFilters({ ...filters, valueTo: e.target.value })}
+        />
+        <select
+          value={filters.valueUnit}
+          onChange={(e) => setFilters({ ...filters, valueUnit: e.target.value })}
+        >
+          <option value="Lakh">Lakh</option>
+          <option value="Crore">Crore</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div className="filters-row">
+    <div className="filter-radio-group">
+      <label>GeM / Non-GeM</label>
+      <div className="radio-options">
+        <label>
+          <input
+            type="radio"
+            name="gemType"
+            value="All"
+            checked={filters.gemType === 'All'}
+            onChange={(e) => setFilters({ ...filters, gemType: e.target.value })}
+          /> All
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="gemType"
+            value="GeM"
+            checked={filters.gemType === 'GeM'}
+            onChange={(e) => setFilters({ ...filters, gemType: e.target.value })}
+          /> GeM
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="gemType"
+            value="Non-GeM"
+            checked={filters.gemType === 'Non-GeM'}
+            onChange={(e) => setFilters({ ...filters, gemType: e.target.value })}
+          /> Non-GeM
+        </label>
+      </div>
+    </div>
+
+    <div className="filter-checkbox-group">
+      <label>
+        <input
+          type="checkbox"
+          checked={filters.isMsme}
+          onChange={(e) => setFilters({ ...filters, isMsme: e.target.checked })}
+        /> MSME
+      </label>
+    </div>
+
+    <div className="filter-radio-group">
+      <label>Startup</label>
+      <div className="radio-options">
+        <label>
+          <input
+            type="radio"
+            name="startupType"
+            value="All"
+            checked={filters.startupType === 'All'}
+            onChange={(e) => setFilters({ ...filters, startupType: e.target.value })}
+          /> All
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="startupType"
+            value="Yes"
+            checked={filters.startupType === 'Yes'}
+            onChange={(e) => setFilters({ ...filters, startupType: e.target.value })}
+          /> Yes
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="startupType"
+            value="No"
+            checked={filters.startupType === 'No'}
+            onChange={(e) => setFilters({ ...filters, startupType: e.target.value })}
+          /> No
+        </label>
+      </div>
+    </div>
+
+    <div className="filter-checkbox-group">
+      <label>
+        <input
+          type="checkbox"
+          checked={filters.isManualEntry}
+          onChange={(e) => setFilters({ ...filters, isManualEntry: e.target.checked })}
+        /> Manual Entry
+      </label>
+    </div>
+  </div>
+
+  <div className="filter-actions">
+    <button className="btn-search" onClick={handleSearch}>Search</button>
+    <button className="btn-clear" onClick={handleClearFilters}>Clear Filters</button>
+  </div>
+
+</div>
+
   </div>
 
   {/* Table Controls */}
