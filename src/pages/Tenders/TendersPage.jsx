@@ -9,15 +9,15 @@ import '../../assets/css/TendersPage.css';
 
 const DUMMY_ARCHIVED_TENDERS = [
   { T_ID: 'T111', title: 'Highway Expansion Project Phase 2', startDate: '2025-01-01', endDate: '2025-02-15', department: 'PWD', location: 'Mumbai', state: 'Maharashtra', value: 65000, emd: 13000000, qty: 1, interested: false },
-  { T_ID: 'T222', title: 'Metro Rail Station Development', startDate: '2025-01-10', endDate: '2025-03-01', department: 'Transport', location: 'Delhi', state: 'Delhi', value: 95000, emd: 19000000, qty: 3, status: 'Awarded', interested: false },
-  { T_ID: 'T333', title: 'Smart City Infrastructure', startDate: '2025-01-05', endDate: '2025-02-28', department: 'Municipal', location: 'Bangalore', state: 'Karnataka', value: 42000, emd: 8500000, qty: 1, status: 'Closed', interested: false },
-  { T_ID: 'T444', title: 'Medical Equipment Supply', startDate: '2025-01-12', endDate: '2025-03-20', department: 'Health', location: 'Chennai', state: 'Tamil Nadu', value: 18500, emd: 3700000, qty: 75, status: 'Awarded', interested: true },
-  { T_ID: 'T555', title: 'Heritage Building Restoration', startDate: '2025-01-03', endDate: '2025-02-25', department: 'Culture', location: 'Kolkata', state: 'West Bengal', value: 12000, emd: 2400000, qty: 2, status: 'Closed', interested: false },
-  { T_ID: 'T666', title: 'Flyover Construction Project', startDate: '2025-01-08', endDate: '2025-02-18', department: 'PWD', location: 'Hyderabad', state: 'Telangana', value: 78000, emd: 15600000, qty: 1, status: 'Awarded', interested: true },
-  { T_ID: 'T777', title: 'Public Park Development', startDate: '2025-01-15', endDate: '2025-03-30', department: 'Municipal', location: 'Pune', state: 'Maharashtra', value: 8500, emd: 1700000, qty: 5, status: 'Closed', interested: false },
-  { T_ID: 'T888', title: 'IT Modernization', startDate: '2025-01-10', endDate: '2025-03-05', department: 'Technology', location: 'Ahmedabad', state: 'Gujarat', value: 22000, emd: 4400000, qty: 1, status: 'Awarded', interested: false },
+  { T_ID: 'T111', title: 'Metro Rail Station Development', startDate: '2025-01-10', endDate: '2025-03-01', department: 'Transport', location: 'Delhi', state: 'Delhi', value: 95000, emd: 19000000, qty: 3, status: 'Awarded', interested: false },
+  { T_ID: 'T111', title: 'Smart City Infrastructure', startDate: '2025-01-05', endDate: '2025-02-28', department: 'Municipal', location: 'Bangalore', state: 'Karnataka', value: 42000, emd: 8500000, qty: 1, status: 'Closed', interested: false },
+  { T_ID: 'T111', title: 'Medical Equipment Supply', startDate: '2025-01-12', endDate: '2025-03-20', department: 'Health', location: 'Chennai', state: 'Tamil Nadu', value: 18500, emd: 3700000, qty: 75, status: 'Awarded', interested: true },
+  { T_ID: 'T111', title: 'Heritage Building Restoration', startDate: '2025-01-03', endDate: '2025-02-25', department: 'Culture', location: 'Kolkata', state: 'West Bengal', value: 12000, emd: 2400000, qty: 2, status: 'Closed', interested: false },
+  { T_ID: 'T111', title: 'Flyover Construction Project', startDate: '2025-01-08', endDate: '2025-02-18', department: 'PWD', location: 'Hyderabad', state: 'Telangana', value: 78000, emd: 15600000, qty: 1, status: 'Awarded', interested: true },
+  { T_ID: 'T111', title: 'Public Park Development', startDate: '2025-01-15', endDate: '2025-03-30', department: 'Municipal', location: 'Pune', state: 'Maharashtra', value: 8500, emd: 1700000, qty: 5, status: 'Closed', interested: false },
+  { T_ID: 'T111', title: 'IT Modernization', startDate: '2025-01-10', endDate: '2025-03-05', department: 'Technology', location: 'Ahmedabad', state: 'Gujarat', value: 22000, emd: 4400000, qty: 1, status: 'Awarded', interested: false },
   {
-    T_ID: 'T999',
+    T_ID: 'T111',
     title: 'Design, engineering, procurement for construction of trauma centre level II by converting into trauma centre level I (Apex Trauma Centre – 200 bedded) at Lala Lajpat Rai Hospital campus affiliated to Government Medical College, Kanpur Nagar on EPC mode, U.P., India.',
     startDate: '2025-01-02',
     endDate: '2025-02-28',
@@ -30,7 +30,7 @@ const DUMMY_ARCHIVED_TENDERS = [
     status: 'Awarded',
     interested: true
   },
-  { T_ID: 'T1010', title: 'Waste Treatment Plant', startDate: '2025-01-20', endDate: '2025-04-10', department: 'Environment', location: 'Surat', state: 'Gujarat', value: 35000, emd: 7000000, qty: 1, status: 'Closed', interested: false },
+  { T_ID: 'T111', title: 'Waste Treatment Plant', startDate: '2025-01-20', endDate: '2025-04-10', department: 'Environment', location: 'Surat', state: 'Gujarat', value: 35000, emd: 7000000, qty: 1, status: 'Closed', interested: false },
 ];
 
 

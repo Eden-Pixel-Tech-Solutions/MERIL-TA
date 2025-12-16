@@ -34,7 +34,7 @@ const TenderDetails = () => {
 
   // Dummy data
   const tenderData = {
-    id: 'GEM/2025/B/6849781',
+    id: 'T111',
     status: 'N/A',
     referenceNo: '12435',
     authority: 'Greater Hyderabad Municipal Corporation',

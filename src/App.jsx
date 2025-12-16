@@ -10,6 +10,7 @@ import TendersPage from "./pages/Tenders/TendersPage";
 import InterestedPage from "./pages/Tenders/InterestedPage";
 import ArchivePage from "./pages/Tenders/ArchivePage";
 import CreateTenderPage from "./pages/Tenders/CreateTender";
+import TenderDetails from "./pages/Tenders/TenderDetails";
 
 // Workdesk pages
 import ActiveWorkspaces from "./pages/Workdesk/ActiveWorkspaces";
@@ -66,6 +67,7 @@ function App() {
 
           {/* Tenders */}
           <Route path="/tenders" element={<TendersPage />} />
+          <Route path="/tenders/tenderdetails/:id" element={<TenderDetails />} />
           <Route path="/interested" element={<InterestedPage />} />
           <Route path="/archive" element={<ArchivePage />} />
           <Route path="/create" element={<CreateTenderPage />} />
