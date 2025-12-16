@@ -1,37 +1,10 @@
 // src/pages/Archive/ArchivePage.jsx
-// Usage:
-// import ArchivePage from 'src/pages/Archive/ArchivePage';
-// <Route path="/archive" element={<ArchivePage/>} />
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../../assets/css/TendersPage.css';
 
-const DUMMY_ARCHIVED_TENDERS = [
-  { T_ID: 'T111', title: 'Highway Expansion Project Phase 2', startDate: '2025-01-01', endDate: '2025-02-15', department: 'PWD', location: 'Mumbai', state: 'Maharashtra', value: 65000, emd: 13000000, qty: 1, interested: false },
-  { T_ID: 'T111', title: 'Metro Rail Station Development', startDate: '2025-01-10', endDate: '2025-03-01', department: 'Transport', location: 'Delhi', state: 'Delhi', value: 95000, emd: 19000000, qty: 3, status: 'Awarded', interested: false },
-  { T_ID: 'T111', title: 'Smart City Infrastructure', startDate: '2025-01-05', endDate: '2025-02-28', department: 'Municipal', location: 'Bangalore', state: 'Karnataka', value: 42000, emd: 8500000, qty: 1, status: 'Closed', interested: false },
-  { T_ID: 'T111', title: 'Medical Equipment Supply', startDate: '2025-01-12', endDate: '2025-03-20', department: 'Health', location: 'Chennai', state: 'Tamil Nadu', value: 18500, emd: 3700000, qty: 75, status: 'Awarded', interested: true },
-  { T_ID: 'T111', title: 'Heritage Building Restoration', startDate: '2025-01-03', endDate: '2025-02-25', department: 'Culture', location: 'Kolkata', state: 'West Bengal', value: 12000, emd: 2400000, qty: 2, status: 'Closed', interested: false },
-  { T_ID: 'T111', title: 'Flyover Construction Project', startDate: '2025-01-08', endDate: '2025-02-18', department: 'PWD', location: 'Hyderabad', state: 'Telangana', value: 78000, emd: 15600000, qty: 1, status: 'Awarded', interested: true },
-  { T_ID: 'T111', title: 'Public Park Development', startDate: '2025-01-15', endDate: '2025-03-30', department: 'Municipal', location: 'Pune', state: 'Maharashtra', value: 8500, emd: 1700000, qty: 5, status: 'Closed', interested: false },
-  { T_ID: 'T111', title: 'IT Modernization', startDate: '2025-01-10', endDate: '2025-03-05', department: 'Technology', location: 'Ahmedabad', state: 'Gujarat', value: 22000, emd: 4400000, qty: 1, status: 'Awarded', interested: false },
-  {
-    T_ID: 'T111',
-    title: 'Design, engineering, procurement for construction of trauma centre level II by converting into trauma centre level I (Apex Trauma Centre – 200 bedded) at Lala Lajpat Rai Hospital campus affiliated to Government Medical College, Kanpur Nagar on EPC mode, U.P., India.',
-    startDate: '2025-01-02',
-    endDate: '2025-02-28',
-    department: 'Transport',
-    location: 'Jaipur',
-    state: 'Rajasthan',
-    value: 125000,
-    emd: 25000000,
-    qty: 50,
-    status: 'Awarded',
-    interested: true
-  },
-  { T_ID: 'T111', title: 'Waste Treatment Plant', startDate: '2025-01-20', endDate: '2025-04-10', department: 'Environment', location: 'Surat', state: 'Gujarat', value: 35000, emd: 7000000, qty: 1, status: 'Closed', interested: false },
-];
+
 
 
 const DUMMY_STATUS_HISTORY = [
@@ -60,7 +33,7 @@ const TenderStatusModal = ({ tender, onClose }) => {
           <h2>Tender Status - {tender.T_ID}</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="status-form">
           <div className="form-group">
             <label htmlFor="tender-status">Tender Status:</label>
@@ -142,41 +115,41 @@ const TenderRow = ({ tender, serialNumber, onAction, onToggleInterest }) => {
 
   return (
     <div className="tender-row-compact">
-      
+
       <div className="tender-main-info">
         <div className="tender-header-line">
-        <b><div className="tender-serial" style={{ fontSize: "14pt"}}>{serialNumber}.</div></b>
+          <b><div className="tender-serial" style={{ fontSize: "14pt" }}>{serialNumber}.</div></b>
 
-          <span className="tender-id-bold" style={{ fontSize: "14pt"}}>Tender Id - {tender.T_ID}</span>
-          <span className="tender-value-bold" style={{ fontSize: "14pt"}}>{formatValue(tender.value)}</span>
-          <b><span className="tender-date" style={{ fontSize: "14pt"}}>
+          <span className="tender-id-bold" style={{ fontSize: "14pt" }}>Tender Id - {tender.T_ID}</span>
+          <span className="tender-value-bold" style={{ fontSize: "14pt" }}>{formatValue(tender.value)}</span>
+          <b><span className="tender-date" style={{ fontSize: "14pt" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
             </svg>
-            {tender.endDate} <span className="days-left-badge" style={{ fontSize: "9pt"}}>{daysLeft} Days Left</span>
+            {tender.endDate} <span className="days-left-badge" style={{ fontSize: "9pt" }}>{daysLeft} Days Left</span>
           </span></b>
-          <b><span className="tender-emd" style={{ fontSize: "13pt"}}>EMD: ₹ {tender.emd.toLocaleString()}</span></b>
+          <b><span className="tender-emd" style={{ fontSize: "13pt" }}>EMD: ₹ {tender.emd.toLocaleString()}</span></b>
         </div>
-        <span style={{height: "2pt"}}></span>
+        <span style={{ height: "2pt" }}></span>
         <Link
           to={`/tenders/tenderdetails/${encodeURIComponent(tender.T_ID)}`}
-          className="tender-title-link" style={{ fontSize: "13.8pt", color: 'black'}}
+          className="tender-title-link" style={{ fontSize: "13.8pt", color: 'black' }}
         >
           {tender.title}
         </Link>
-        <span style={{height: "2pt"}}></span>
+        <span style={{ height: "2pt" }}></span>
 
-        <div className="tender-location-line"  style={{
-    fontWeight: 755,
-    fontSize: '12pt',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    marginTop: '8px',
-    color: '#084f9a'
-  }}>
+        <div className="tender-location-line" style={{
+          fontWeight: 755,
+          fontSize: '12pt',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          marginTop: '8px',
+          color: '#084f9a'
+        }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
           </svg>
           {tender.department} - {tender.location}, {tender.state}
         </div>
@@ -190,7 +163,7 @@ const TenderRow = ({ tender, serialNumber, onAction, onToggleInterest }) => {
           className="action-icon-btn"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="15" x2="15" y2="15"/>
+            <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="9" y1="9" x2="15" y2="9" /><line x1="9" y1="15" x2="15" y2="15" />
           </svg>
         </button>
 
@@ -201,7 +174,7 @@ const TenderRow = ({ tender, serialNumber, onAction, onToggleInterest }) => {
           className="action-icon-btn"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
           </svg>
         </button>
 
@@ -212,7 +185,7 @@ const TenderRow = ({ tender, serialNumber, onAction, onToggleInterest }) => {
           className="action-icon-btn"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            <polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
           </svg>
         </button>
 
@@ -223,7 +196,7 @@ const TenderRow = ({ tender, serialNumber, onAction, onToggleInterest }) => {
           className={`action-icon-btn ${tender.interested ? 'interested-active' : ''}`}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill={tender.interested ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
         </button>
 
@@ -234,7 +207,7 @@ const TenderRow = ({ tender, serialNumber, onAction, onToggleInterest }) => {
           className="action-icon-btn"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
           </svg>
         </button>
 
@@ -245,7 +218,7 @@ const TenderRow = ({ tender, serialNumber, onAction, onToggleInterest }) => {
           className="action-icon-btn"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
           </svg>
         </button>
       </div>
@@ -277,7 +250,61 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 export default function ArchivePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState('desc');
-  const [tenders, setTenders] = useState(DUMMY_ARCHIVED_TENDERS);
+  const [tenders, setTenders] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    fetchTenders();
+  }, [currentPage, sortOrder]);
+
+  const fetchTenders = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: 10,
+        sort: sortOrder,
+        archived: 'true', // archive page
+        search: searchKeyword
+      });
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/tenders?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      const data = await res.json();
+
+      // 🔹 Map backend → UI format
+      const mapped = data.data.map(t => ({
+        T_ID: t.T_ID,
+        title: t.title,
+        department: t.department,
+        startDate: t.start_date,
+        endDate: t.end_date,
+        qty: Number(t.qty) || 0,
+        value: Number(t.value) || 0,
+        interested: t.interested,
+        // optional placeholders (UI expects these)
+        location: '—',
+        state: '—',
+        emd: 0,
+        status: 'Closed'
+      }));
+
+      setTenders(mapped);
+      setTotalPages(Math.ceil(data.total / 10));
+    } catch (err) {
+      console.error('Failed to fetch tenders', err);
+    }
+  };
+
+
   const [showFilters, setShowFilters] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedTender, setSelectedTender] = useState(null);
@@ -367,7 +394,6 @@ export default function ArchivePage() {
     return sorted;
   }, [filteredTenders, sortOrder]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedTenders.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentTenders = sortedTenders.slice(startIndex, startIndex + itemsPerPage);
 
@@ -383,14 +409,30 @@ export default function ArchivePage() {
     }
   };
 
-  const handleToggleInterest = (tid) => {
-    setTenders(prevTenders =>
-      prevTenders.map(t =>
-        t.T_ID === tid ? { ...t, interested: !t.interested } : t
-      )
-    );
-    console.log(`Toggled interest for Archived Tender: ${tid}`);
+  const handleToggleInterest = async (tid) => {
+    try {
+      const token = localStorage.getItem('token');
+
+      await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/tenders/${encodeURIComponent(tid)}/interest`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      setTenders(prev =>
+        prev.map(t =>
+          t.T_ID === tid ? { ...t, interested: !t.interested } : t
+        )
+      );
+    } catch (err) {
+      console.error('Failed to toggle interest', err);
+    }
   };
+
 
   const handleClearFilters = () => {
     setSearchKeyword('');
@@ -411,8 +453,9 @@ export default function ArchivePage() {
 
   const handleSearch = () => {
     setCurrentPage(1);
-    console.log('Archive search executed with filters');
+    fetchTenders();
   };
+
 
   return (
     <div className="archive-page">
@@ -424,7 +467,7 @@ export default function ArchivePage() {
         <div className="archive-search-bar-container">
           <div className="archive-search-input-wrapper">
             <svg className="archive-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
             </svg>
             <input
               type="text"
@@ -440,7 +483,7 @@ export default function ArchivePage() {
             onClick={() => setShowFilters(prev => !prev)}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="6 9 12 15 18 9"/>
+              <polyline points="6 9 12 15 18 9" />
             </svg>
           </button>
         </div>

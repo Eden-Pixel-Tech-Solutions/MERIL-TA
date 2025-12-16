@@ -1,23 +1,17 @@
 // src/components/layout/Navbar.jsx
-/**
- * Full-featured Navbar for Meril Tenders
- * - Uses react-router-dom Link for navigation
- * - Matches CSS classes in src/assets/css/navbar.css
- * - Desktop: hover dropdowns; Mobile: hamburger + accordion submenus
- * - Accessibility: aria attributes, keyboard navigation
- *
- * Usage:
- *  place this file at: src/components/layout/Navbar.jsx
- *  ensure CSS at: src/assets/css/navbar.css
- *  In App.jsx: <BrowserRouter><Navbar /><Routes>...</Routes></BrowserRouter>
- */
-
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "../../assets/css/navbar.css";
+
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const role = user?.role || "User";
+  const basePath = role === "Admin" ? "/Admin" : "/User";
+
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null); // desktop hover/focus
@@ -27,37 +21,43 @@ const Navbar = () => {
   const navRef = useRef(null);
   const profileRef = useRef(null);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   // Full navigation structure
   const navItems = [
     {
       label: "Tenders",
       items: [
-        { name: "Tenders", path: "/tenders" },
-        { name: "Interested Tenders", path: "/interested" },
-        { name: "Archived Tenders", path: "/archive" },
-        { name: "Create / Modify Tender", path: "/create" },
+        { name: "Tenders", path: `${basePath}/tenders` },
+        { name: "Interested Tenders", path: `${basePath}/interested` },
+        { name: "Archived Tenders", path: `${basePath}/archive` },
+        { name: "Create / Modify Tender", path: `${basePath}/create` },
       ],
     },
     {
-  label: "Tender Insights",
-  items: [
-    { name: "Winning Probability", path: "/insights/winning-probability" },
-    { name: "Competitor Analysis", path: "/insights/competitor-analysis" },
-    { name: "Competitor Profile", path: "/insights/CompetitorProfile" }, 
-    { name: "Product Suggestions", path: "/insights/product-suggestions" },
-    { name: "Pricing Evaluation", path: "/insights/pricing-evaluation" },
-    { name: "BOQ Insights", path: "/insights/boq-insights" },
-    { name: "Historical Comparison", path: "/insights/historical-comparison" },
-    { name: "Company Profile", path: "/insights/Company-Profile" },
-    { name: "Compare Bidders", path: "/insights/Compare-Bidders" },
-  ],
-},
+      label: "Tender Insights",
+      items: [
+        { name: "Winning Probability", path: "/insights/winning-probability" },
+        { name: "Competitor Analysis", path: "/insights/competitor-analysis" },
+        { name: "Competitor Profile", path: "/insights/CompetitorProfile" },
+        { name: "Product Suggestions", path: "/insights/product-suggestions" },
+        { name: "Pricing Evaluation", path: "/insights/pricing-evaluation" },
+        { name: "BOQ Insights", path: "/insights/boq-insights" },
+        { name: "Historical Comparison", path: "/insights/historical-comparison" },
+        { name: "Company Profile", path: "/insights/Company-Profile" },
+        { name: "Compare Bidders", path: "/insights/Compare-Bidders" },
+      ],
+    },
 
     {
       label: "Tender Workdesk",
       items: [
         { name: "Active Workspaces", path: "/workdesk/active-workspaces" },
-        
+
       ],
     },
     {
@@ -213,7 +213,7 @@ const Navbar = () => {
               aria-haspopup="true"
               aria-expanded={
                 (activeDropdown === idx && !mobileMenuOpen) ||
-                (mobileExpandedMenu === idx && mobileMenuOpen)
+                  (mobileExpandedMenu === idx && mobileMenuOpen)
                   ? "true"
                   : "false"
               }
@@ -229,12 +229,11 @@ const Navbar = () => {
 
             {/* Dropdown / Submenu */}
             <ul
-              className={`navbar-dropdown ${
-                (activeDropdown === idx && !mobileMenuOpen) ||
+              className={`navbar-dropdown ${(activeDropdown === idx && !mobileMenuOpen) ||
                 (mobileExpandedMenu === idx && mobileMenuOpen)
-                  ? "active"
-                  : ""
-              }`}
+                ? "active"
+                : ""
+                }`}
               role="menu"
               aria-label={`${top.label} submenu`}
             >
@@ -292,7 +291,14 @@ const Navbar = () => {
         >
           {profileItems.map((p, i) => (
             <li key={i} role="none">
-              {p.path && p.path !== "#" ? (
+              {p.name === "Logout" ? (
+                <button
+                  className="navbar-profile-item"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </button>
+              ) : (
                 <Link
                   to={p.path}
                   className="navbar-profile-item"
@@ -301,17 +307,10 @@ const Navbar = () => {
                 >
                   {p.name}
                 </Link>
-              ) : (
-                <a
-                  href="#"
-                  className="navbar-profile-item"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  {p.name}
-                </a>
               )}
             </li>
           ))}
+
         </ul>
       </div>
     </nav>
