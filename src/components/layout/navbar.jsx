@@ -2,6 +2,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import "../../assets/css/navbar.css";
+import Logo from '../../assets/img/logo.png';
+import Flag from '../../assets/img/image.png';
+import Profile from '../../assets/img/profile.png';
 
 
 const Navbar = () => {
@@ -29,6 +32,12 @@ const Navbar = () => {
 
   // Full navigation structure
   const navItems = [
+    {
+      label: "Home",
+      items: [
+        { name: "Home", path: `${basePath}/home` },
+      ],
+    },
     {
       label: "Tenders",
       items: [
@@ -177,143 +186,148 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar" ref={navRef} aria-label="Main navigation">
-      {/* Brand / Logo */}
-      <div className="navbar-brand">
-        <Link to="/" className="navbar-logo-text" aria-label="Meril Tenders Home">
-          Meril Tenders
-        </Link>
-      </div>
+    <>
+      <nav className="navbar" ref={navRef} aria-label="Main navigation">
+        {/* Brand / Logo */}
+        <div className="navbar-brand">
+          <Link to="/" className="navbar-logo-text" aria-label="Meril Tenders Home">
+            <img src={Logo} alt="" className="LogoImg"/>
+            <span className="gaper">sd</span>
+            <img src={Flag} alt="" className="FlagImg" />
+          </Link>
+        </div>
 
-      {/* Mobile Hamburger */}
-      <button
-        className={`navbar-hamburger ${mobileMenuOpen ? "active" : ""}`}
-        onClick={toggleMobileMenu}
-        aria-label="Toggle navigation"
-        aria-expanded={mobileMenuOpen}
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
-      {/* Main Menu */}
-      <ul className={`navbar-menu ${mobileMenuOpen ? "mobile-open" : ""}`} role="menubar">
-        {navItems.map((top, idx) => (
-          <li
-            className="navbar-item"
-            key={top.label}
-            onMouseEnter={() => !mobileMenuOpen && setActiveDropdown(idx)}
-            onMouseLeave={() => !mobileMenuOpen && setActiveDropdown(null)}
-            role="none"
-          >
-            <button
-              id={`nav-top-${idx}`}
-              className="navbar-link"
-              aria-haspopup="true"
-              aria-expanded={
-                (activeDropdown === idx && !mobileMenuOpen) ||
-                  (mobileExpandedMenu === idx && mobileMenuOpen)
-                  ? "true"
-                  : "false"
-              }
-              onKeyDown={(e) => handleTopKeyDown(e, idx)}
-              onClick={() => mobileMenuOpen && toggleMobileSubmenu(idx)}
-              role="menuitem"
-            >
-              <span>{top.label}</span>
-              <span className="dropdown-arrow" aria-hidden>
-                ▾
-              </span>
-            </button>
-
-            {/* Dropdown / Submenu */}
-            <ul
-              className={`navbar-dropdown ${(activeDropdown === idx && !mobileMenuOpen) ||
-                (mobileExpandedMenu === idx && mobileMenuOpen)
-                ? "active"
-                : ""
-                }`}
-              role="menu"
-              aria-label={`${top.label} submenu`}
-            >
-              {top.items.map((sub, sidx) => (
-                <li key={sidx} role="none">
-                  {sub.path && sub.path !== "#" ? (
-                    <Link
-                      to={sub.path}
-                      className="navbar-dropdown-item"
-                      role="menuitem"
-                      aria-current={isRouteActive(sub.path) ? "page" : undefined}
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        setActiveDropdown(null);
-                        setMobileExpandedMenu(null);
-                      }}
-                    >
-                      {sub.name}
-                    </Link>
-                  ) : (
-                    <a
-                      href="#"
-                      className="navbar-dropdown-item"
-                      role="menuitem"
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      {sub.name}
-                    </a>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ul>
-
-      {/* Profile area */}
-      <div className="navbar-profile" ref={profileRef}>
+        {/* Mobile Hamburger */}
         <button
-          className="navbar-profile-btn"
-          onClick={() => setProfileOpen(!profileOpen)}
-          aria-haspopup="true"
-          aria-expanded={profileOpen}
-          aria-label="User profile menu"
+          className={`navbar-hamburger ${mobileMenuOpen ? "active" : ""}`}
+          onClick={toggleMobileMenu}
+          aria-label="Toggle navigation"
+          aria-expanded={mobileMenuOpen}
         >
-          <div className="navbar-avatar" aria-hidden>
-            U
-          </div>
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
 
-        <ul
-          className={`navbar-profile-dropdown ${profileOpen ? "active" : ""}`}
-          role="menu"
-          aria-label="User menu"
-        >
-          {profileItems.map((p, i) => (
-            <li key={i} role="none">
-              {p.name === "Logout" ? (
-                <button
-                  className="navbar-profile-item"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
-              ) : (
-                <Link
-                  to={p.path}
-                  className="navbar-profile-item"
-                  role="menuitem"
-                  onClick={() => setProfileOpen(false)}
-                >
-                  {p.name}
-                </Link>
-              )}
+        {/* Main Menu */}
+        <ul className={`navbar-menu ${mobileMenuOpen ? "mobile-open" : ""}`} role="menubar">
+          {navItems.map((top, idx) => (
+            <li
+              className="navbar-item"
+              key={top.label}
+              onMouseEnter={() => !mobileMenuOpen && setActiveDropdown(idx)}
+              onMouseLeave={() => !mobileMenuOpen && setActiveDropdown(null)}
+              role="none"
+            >
+              <button
+                id={`nav-top-${idx}`}
+                className="navbar-link"
+                aria-haspopup="true"
+                aria-expanded={
+                  (activeDropdown === idx && !mobileMenuOpen) ||
+                    (mobileExpandedMenu === idx && mobileMenuOpen)
+                    ? "true"
+                    : "false"
+                }
+                onKeyDown={(e) => handleTopKeyDown(e, idx)}
+                onClick={() => mobileMenuOpen && toggleMobileSubmenu(idx)}
+                role="menuitem"
+              >
+                <span>{top.label}</span>
+                <span className="dropdown-arrow" aria-hidden>
+                  ▾
+                </span>
+              </button>
+
+              {/* Dropdown / Submenu */}
+              <ul
+                className={`navbar-dropdown ${(activeDropdown === idx && !mobileMenuOpen) ||
+                  (mobileExpandedMenu === idx && mobileMenuOpen)
+                  ? "active"
+                  : ""
+                  }`}
+                role="menu"
+                aria-label={`${top.label} submenu`}
+              >
+                {top.items.map((sub, sidx) => (
+                  <li key={sidx} role="none">
+                    {sub.path && sub.path !== "#" ? (
+                      <Link
+                        to={sub.path}
+                        className="navbar-dropdown-item"
+                        role="menuitem"
+                        aria-current={isRouteActive(sub.path) ? "page" : undefined}
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setActiveDropdown(null);
+                          setMobileExpandedMenu(null);
+                        }}
+                      >
+                        {sub.name}
+                      </Link>
+                    ) : (
+                      <a
+                        href="#"
+                        className="navbar-dropdown-item"
+                        role="menuitem"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        {sub.name}
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </li>
           ))}
-
         </ul>
-      </div>
-    </nav>
+
+        {/* Profile area */}
+        <div className="navbar-profile" ref={profileRef}>
+          <button
+            className="navbar-profile-btn"
+            onClick={() => setProfileOpen(!profileOpen)}
+            aria-haspopup="true"
+            aria-expanded={profileOpen}
+            aria-label="User profile menu"
+          >
+            <div className="navbar-avatar" aria-hidden>
+              <img src={Profile} alt="" className="UserProfile" />
+            </div>
+          </button>
+
+          <ul
+            className={`navbar-profile-dropdown ${profileOpen ? "active" : ""}`}
+            role="menu"
+            aria-label="User menu"
+          >
+            {profileItems.map((p, i) => (
+              <li key={i} role="none">
+                {p.name === "Logout" ? (
+                  <button
+                    className="navbar-profile-item"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <Link
+                    to={p.path}
+                    className="navbar-profile-item"
+                    role="menuitem"
+                    onClick={() => setProfileOpen(false)}
+                  >
+                    {p.name}
+                  </Link>
+                )}
+              </li>
+            ))}
+
+          </ul>
+        </div>
+      </nav>
+      <hr className="GoldenLine" />
+    </>
   );
 };
 

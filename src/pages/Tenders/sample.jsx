@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import '../../assets/css/TenderDetails.css';
 
-const TenderDetails = () => {
-  const { tenderId } = useParams();
-
-  // Environment variables
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-  const JSON_SERVER_URL = import.meta.env.VITE_JSON_SERVER_URL || 'http://192.168.1.3:5006';
+const Sample = () => {
 
   /* ---------------- UI STATES ---------------- */
   const [expandedSections, setExpandedSections] = useState({
@@ -23,8 +17,6 @@ const TenderDetails = () => {
   /* ---------------- DATA STATES ---------------- */
   const [details, setDetails] = useState(null);
   const [links, setLinks] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   // 🔥 Technical specs states (UPDATED)
   const [techSpecs, setTechSpecs] = useState([]); // ARRAY OF CATALOGUES
@@ -32,50 +24,8 @@ const TenderDetails = () => {
 
   /* ---------------- MAIN API (Tender JSON) ---------------- */
   useEffect(() => {
-    if (!tenderId) return;
-
-    setLoading(true);
-    setError(null);
-
-    // First get the JSON path from backend
-    fetch(`${API_BASE_URL}/tenders/${tenderId}/documents/path`)
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`Backend server not responding (${res.status})`);
-        }
-        return res.json();
-      })
-      .then(pathResponse => {
-        if (pathResponse.message && pathResponse.message.includes("JSON path not found")) {
-          throw new Error(`File not available for tender: ${pathResponse.bid_number}`);
-        }
-        if (pathResponse.json_path) {
-          // Clean up the json_path - remove extra quotes
-          let jsonPath = pathResponse.json_path;
-          if (jsonPath.startsWith('"') && jsonPath.endsWith('"')) {
-            jsonPath = jsonPath.slice(1, -1); // Remove outer quotes
-          }
-          // Convert local file path to HTTP URL using Python server
-          // Check for Windows path (Drive letter check or backslashes)
-          if (/^[a-zA-Z]:/.test(jsonPath) || jsonPath.includes('\\')) {
-            // Extract filename from path and serve via Python server
-            const fileName = jsonPath.split(/[/\\]/).pop(); // Split by / or \
-            jsonPath = `${JSON_SERVER_URL}/${fileName}`;
-          }
-          // Use the json_path to fetch the actual JSON data
-          return fetch(jsonPath)
-            .then(res => {
-              // Check if response is HTML (error page) instead of JSON
-              const contentType = res.headers.get('content-type');
-              if (contentType && contentType.includes('text/html')) {
-                throw new Error('Server returned HTML instead of JSON - check if the JSON file path is correct');
-              }
-              return res.json();
-            });
-        } else {
-          throw new Error('No JSON path found');
-        }
-      })
+    fetch("http://localhost:5000/data")
+      .then(res => res.json())
       .then(json => {
 
         const extracted = {
@@ -143,14 +93,8 @@ const TenderDetails = () => {
 
         setLinks(uniqueLinks);
       })
-      .catch(err => {
-        console.error("Failed to load tender data:", err);
-        setError(err.message || "Failed to load tender data");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [tenderId, API_BASE_URL, JSON_SERVER_URL]);
+      .catch(console.error);
+  }, []);
 
   /* ---------------- FETCH TECH SPECS (MULTI) ---------------- */
   const fetchTechSpecs = async () => {
@@ -235,28 +179,7 @@ const TenderDetails = () => {
     });
   };
 
-  if (loading) return <p>Loading tender data...</p>;
-  if (error) return (
-    <div className="error-container" style={{ padding: '20px', textAlign: 'center' }}>
-      <h3>Error Loading Tender Data</h3>
-      <p style={{ color: '#dc3545', fontSize: '16px' }}>{error}</p>
-      <button
-        onClick={() => window.location.reload()}
-        style={{
-          padding: '8px 16px',
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          marginTop: '10px'
-        }}
-      >
-        Retry
-      </button>
-    </div>
-  );
-  if (!details) return <p>Loading tender data...</p>;
+  if (!details) return <p>Loading...</p>;
 
   const tenderDocumentLinks = links.filter(
     l => !l.uri.includes('/showCatalogue/')
@@ -353,13 +276,13 @@ const TenderDetails = () => {
                           <tbody>
                             {catalogue.rows.map((row, rIdx) => {
                               const rowSpan = rowSpans[rIdx];
-
+                              
                               return (
                                 <tr key={rIdx}>
                                   {/* Only render category cell if rowSpan > 0 (first cell in merged group) */}
                                   {rowSpan > 0 && (
-                                    <td
-                                      rowSpan={rowSpan}
+                                    <td 
+                                      rowSpan={rowSpan} 
                                       className="merged-cell"
                                     >
                                       {row.category}
@@ -398,7 +321,7 @@ const TenderDetails = () => {
                   {tenderDocumentLinks.length > 0 ? (
                     tenderDocumentLinks.map((link, i) => (
                       <div key={i} className="document-row">
-
+                        
                         <a href={link.uri} target="_blank" rel="noopener noreferrer" className="btn-download">
                           Download
                         </a>
@@ -440,7 +363,7 @@ const TenderDetails = () => {
               ♡ Interested
             </button>
             <button className="feature-btn">⏰ Set Reminder</button>
-            <button className="feature-btn">⬇ Download BID Document</button>
+            <button className="feature-btn">⬇ Download NIT</button>
             <button className="feature-btn">📄 View BOQ</button>
             <button className="feature-btn">↗ Share</button>
           </div>
@@ -451,4 +374,4 @@ const TenderDetails = () => {
   );
 };
 
-export default TenderDetails;
+export default Sample;

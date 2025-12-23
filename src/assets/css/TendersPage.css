@@ -1,4 +1,4 @@
-/* TendersPage.css - Compact Row Design with #084f9a and White */
+/* TendersPage.css - Full Width Container */
 
 :root {
   --archive-bg: #ffffff;
@@ -10,10 +10,12 @@
 }
 
 .archive-page {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 2rem 3rem;
   background-color: var(--archive-bg);
+  box-sizing: border-box;
 }
 
 .archive-page-header {
@@ -626,11 +628,34 @@
 /* Pagination */
 .archive-pagination {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
+  justify-content: center;
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.pagination-btn {
+  padding: 6px 12px;
+  border: 1px solid #d0d7de;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  border-color: var(--archive-accent);
+}
+
+.pagination-btn.active {
+  background: #084f9a;
+  color: #fff;
+  border-color: #084f9a;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .archive-pagination-info {
@@ -679,8 +704,76 @@
   border: 1px solid #e5e7eb;
 }
 
+/* Shimmer Loading */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background: #f6f7f8;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150px;
+  width: 150px;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  animation: shimmer 1.2s infinite;
+}
+
+.shimmer-line {
+  height: 14px;
+  background: #e5e7eb;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.shimmer-line.title {
+  width: 70%;
+  height: 18px;
+}
+
+.shimmer-line.short {
+  width: 40%;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
 /* Responsive Design */
+@media (max-width: 1400px) {
+  .archive-page {
+    padding: 2rem 2rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .archive-page {
+    padding: 1.5rem 1.5rem;
+  }
+  
+  .archive-filters-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
+  .archive-page {
+    padding: 1.25rem 1rem;
+  }
+  
   .archive-filters-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -697,6 +790,10 @@
 }
 
 @media (max-width: 560px) {
+  .archive-page {
+    padding: 1rem 0.75rem;
+  }
+  
   .archive-filters-grid {
     grid-template-columns: 1fr;
   }

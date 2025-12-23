@@ -4,7 +4,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../../assets/css/TendersPage.css';
 
-const itemsPerPage = 20;
 const ITEMS_PER_PAGE = 20;
 
 const DUMMY_STATUS_HISTORY = [
@@ -18,15 +17,89 @@ const TenderStatusModal = ({ tender, onClose }) => {
     status: 'proceed',
     remark: ''
   });
+  const [statusHistory, setStatusHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  // Fetch status history on component mount
+  useEffect(() => {
+    const fetchStatusHistory = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const token = localStorage.getItem('token');
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/tenders/${encodeURIComponent(tender.T_ID)}/status/history`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+
+        const data = await response.json();
+        
+        if (data.success) {
+          setStatusHistory(data.data || []);
+        } else {
+          setError(data.message || 'Failed to fetch status history');
+        }
+      } catch (err) {
+        console.error('Error fetching status history:', err);
+        setError('Failed to fetch status history');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (tender?.T_ID) {
+      fetchStatusHistory();
+    }
+  }, [tender?.T_ID]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Status Update:', { tenderId: tender.T_ID, ...formData });
-    alert(`Status updated for Tender ${tender.T_ID}`);
-    // In real app, you would update the backend here
+    
+    try {
+      setSubmitting(true);
+      setError(null);
+      
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/tenders/${encodeURIComponent(tender.T_ID)}/status`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            status: formData.status,
+            remarks: formData.remark
+          })
+        }
+      );
+
+      const data = await response.json();
+      
+      if (data.success) {
+        // Add the new status to the history
+        setStatusHistory(prev => [data.data, ...prev]);
+        
+        // Reset form
+        setFormData({ status: 'proceed', remark: '' });
+        
+        alert(`Status updated successfully for Tender ${tender.T_ID}`);
+      } else {
+        setError(data.message || 'Failed to update status');
+      }
+    } catch (err) {
+      console.error('Error updating status:', err);
+      setError('Failed to update status');
+    } finally {
+      setSubmitting(false);
+    }
   };
-
-
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -37,6 +110,12 @@ const TenderStatusModal = ({ tender, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="status-form">
+          {error && (
+            <div className="error-message" style={{ color: '#dc3545', marginBottom: '15px', padding: '10px', backgroundColor: '#f8d7da', borderRadius: '4px' }}>
+              {error}
+            </div>
+          )}
+          
           <div className="form-group">
             <label htmlFor="tender-status">Tender Status:</label>
             <select
@@ -44,6 +123,7 @@ const TenderStatusModal = ({ tender, onClose }) => {
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               className="form-select"
+              disabled={submitting}
             >
               <option value="proceed">Proceed</option>
               <option value="win">Win</option>
@@ -61,34 +141,43 @@ const TenderStatusModal = ({ tender, onClose }) => {
               className="form-textarea"
               rows="4"
               placeholder="Enter your remarks here..."
+              disabled={submitting}
             />
           </div>
 
-          <button type="submit" className="btn-submit">Submit</button>
+          <button type="submit" className="btn-submit" disabled={submitting}>
+            {submitting ? 'Submitting...' : 'Submit'}
+          </button>
         </form>
 
         <div className="status-history">
           <h3>Status History</h3>
-          <table className="history-table">
-            <thead>
-              <tr>
-                <th>Tender Status</th>
-                <th>Remarks</th>
-                <th>Created Date</th>
-                <th>Updated Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {DUMMY_STATUS_HISTORY.map((record, idx) => (
-                <tr key={idx}>
-                  <td><span className={`status-badge ${record.status.toLowerCase()}`}>{record.status}</span></td>
-                  <td>{record.remarks}</td>
-                  <td>{record.createdDate}</td>
-                  <td>{record.updatedDate}</td>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '20px' }}>Loading status history...</div>
+          ) : statusHistory.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>No status history available</div>
+          ) : (
+            <table className="history-table">
+              <thead>
+                <tr>
+                  <th>Tender Status</th>
+                  <th>Remarks</th>
+                  <th>Created Date</th>
+                  <th>Updated Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {statusHistory.map((record, idx) => (
+                  <tr key={idx}>
+                    <td><span className={`status-badge ${record.status.toLowerCase()}`}>{record.status}</span></td>
+                    <td>{record.remarks || '-'}</td>
+                    <td>{new Date(record.created_date).toLocaleDateString()}</td>
+                    <td>{new Date(record.updated_date).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
@@ -152,27 +241,31 @@ const TenderRow = ({ tender, serialNumber, onAction, onToggleInterest }) => {
 
   const daysLeft = calculateDaysLeft(tender.endDate);
 
+  const toTenderUrlId = (tenderId) => {
+    return (tenderId || '').split('/').join('_');
+  };
+
   return (
     <div className="tender-row-compact">
 
       <div className="tender-main-info">
         <div className="tender-header-line">
-          <b><div className="tender-serial" style={{ fontSize: "14pt" }}>{serialNumber}.</div></b>
+          <b><div className="tender-serial" style={{ fontSize: "12pt" }}>{serialNumber}.</div></b>
 
-          <span className="tender-id-bold" style={{ fontSize: "14pt" }}>Tender Id: {tender.T_ID}</span>
-          <span className="tender-value-bold" style={{ fontSize: "14pt" }}>{formatValue(tender.value)}</span>
-          <b><span className="tender-date" style={{ fontSize: "14pt" }}>
+          <span className="tender-id-bold" style={{ fontSize: "12pt" }}>Tender Id: {tender.T_ID}</span>
+          <span className="tender-value-bold" style={{ fontSize: "12pt" }}>{formatValue(tender.value)}</span>
+          <b><span className="tender-date" style={{ fontSize: "12pt" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
             </svg>
-            {tender.endDate} <span className="days-left-badge" style={{ fontSize: "9pt" }}>{daysLeft} Days Left</span>
+            {tender.endDate} <span className="days-left-badge" style={{ fontSize: "8pt" }}>{daysLeft} Days Left</span>
           </span></b>
-          <b><span className="tender-emd" style={{ fontSize: "13pt" }}>EMD: ₹ {tender.emd.toLocaleString()}</span></b>
+          <b><span className="tender-emd" style={{ fontSize: "11pt" }}>EMD: ₹ {tender.emd.toLocaleString()}</span></b>
         </div>
         <span style={{ height: "2pt" }}></span>
         <Link
-          to={`/tenders/tenderdetails/${encodeURIComponent(tender.T_ID)}`}
-          className="tender-title-link" style={{ fontSize: "13.8pt", color: 'black' }}
+          to={`/tenders/tenderdetails/${encodeURIComponent(toTenderUrlId(tender.T_ID))}`}
+          className="tender-title-link" style={{ fontSize: "11.8pt", color: 'black' }}
         >
           {tender.title}
         </Link>
@@ -251,7 +344,7 @@ const TenderRow = ({ tender, serialNumber, onAction, onToggleInterest }) => {
         </button>
 
         <button
-          onClick={(e) => { e.stopPropagation(); onAction('download', tender.T_ID); }}
+          onClick={(e) => { e.stopPropagation(); onAction('download', tender); }}
           aria-label="Download"
           title="Download"
           className="action-icon-btn"
@@ -266,25 +359,60 @@ const TenderRow = ({ tender, serialNumber, onAction, onToggleInterest }) => {
 };
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-  const remainingPages = Math.max(0, totalPages - currentPage);
+  if (totalPages <= 1) return null;
+
+  const getPages = () => {
+    const pages = [];
+    const start = Math.max(1, currentPage - 2);
+    const end = Math.min(totalPages, currentPage + 2);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
 
   return (
-    <div className="archive-pagination" role="navigation" aria-label="Archive pagination">
-      <div className="archive-pagination-info">
-        Page {currentPage} of {totalPages}
-        <span className="archive-remaining">Remaining pages: {remainingPages}</span>
-      </div>
+    <div className="archive-pagination">
       <button
-        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-        disabled={currentPage >= totalPages}
+        className="pagination-btn"
+        disabled={currentPage === 1}
+        onClick={() => onPageChange(currentPage - 1)}
       >
-        Next
+        ◀ Previous
       </button>
 
+      {getPages().map(page => (
+        <button
+          key={page}
+          className={`pagination-btn ${page === currentPage ? 'active' : ''
+            }`}
+          onClick={() => onPageChange(page)}
+        >
+          {page}
+        </button>
+      ))}
+
+      <button
+        className="pagination-btn"
+        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(currentPage + 1)}
+      >
+        Next ▶
+      </button>
     </div>
   );
 };
 
+const TenderSkeleton = () => {
+  return (
+    <div className="tender-row-compact shimmer">
+      <div className="shimmer-line title"></div>
+      <div className="shimmer-line short"></div>
+      <div className="shimmer-line"></div>
+    </div>
+  );
+};
 
 export default function ArchivePage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -292,7 +420,23 @@ export default function ArchivePage() {
   const [tenders, setTenders] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [selectedTender, setSelectedTender] = useState(null);
 
+  // Filter states
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [referenceNumber, setReferenceNumber] = useState('');
+  const [selectedState, setSelectedState] = useState('');
+  const [city, setCity] = useState('');
+  const [departmentName, setDepartmentName] = useState('');
+  const [tenderId, setTenderId] = useState('');
+  const [quantityOperator, setQuantityOperator] = useState('>=');
+  const [quantityValue, setQuantityValue] = useState('');
+  const [valueOperator, setValueOperator] = useState('=');
+  const [valueFrom, setValueFrom] = useState('');
+  const [valueTo, setValueTo] = useState('');
+  const [valueUnit, setValueUnit] = useState('Lakh');
 
   useEffect(() => {
     const fetchTenders = async () => {
@@ -305,7 +449,17 @@ export default function ArchivePage() {
           limit: ITEMS_PER_PAGE,
           sort: sortOrder,
           archived: 'true',
-          search: searchKeyword
+          search: searchKeyword,
+          referenceNumber: referenceNumber,
+          city: city,
+          departmentName: departmentName,
+          tenderId: tenderId,
+          quantityOperator: quantityOperator,
+          quantityValue: quantityValue,
+          valueOperator: valueOperator,
+          valueFrom: valueFrom,
+          valueTo: valueTo,
+          valueUnit: valueUnit
         });
 
         const res = await fetch(
@@ -327,6 +481,7 @@ export default function ArchivePage() {
             qty: Number(t.qty) || 0,
             value: Number(t.value) || 0,
             interested: t.interested,
+            detail_url: t.detail_url, // ✅ REQUIRED FOR DOWNLOAD
             location: '—',
             state: '—',
             emd: 0,
@@ -344,166 +499,41 @@ export default function ArchivePage() {
       }
     };
 
-
-
-
     fetchTenders();
-  }, [currentPage]);
-
-
-  const fetchTenders = async () => {
-    try {
-      const token = localStorage.getItem('token');
-
-      const params = new URLSearchParams({
-        page: currentPage,
-        limit: 20,
-        sort: sortOrder,
-        archived: 'true', // archive page
-        search: searchKeyword
-      });
-
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/tenders?${params.toString()}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      const data = await res.json();
-
-      // 🔹 Map backend → UI format
-      const mapped = data.data.map(t => ({
-        T_ID: t.T_ID,
-        title: t.title,
-        department: t.department,
-        startDate: t.start_date,
-        endDate: t.end_date,
-        qty: Number(t.qty) || 0,
-        value: Number(t.value) || 0,
-        interested: t.interested,
-        // optional placeholders (UI expects these)
-        location: '—',
-        state: '—',
-        emd: 0,
-        status: 'Closed'
-      }));
-
-      setTenders(mapped);
-      setTotalPages(Math.ceil(data.total / 20));
-    } catch (err) {
-      console.error('Failed to fetch tenders', err);
-    }
-  };
-
-
-  const [showFilters, setShowFilters] = useState(false);
-  const [showStatusModal, setShowStatusModal] = useState(false);
-  const [selectedTender, setSelectedTender] = useState(null);
-
-  // Filter states
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [referenceNumber, setReferenceNumber] = useState('');
-  const [selectedState, setSelectedState] = useState('');
-  const [city, setCity] = useState('');
-  const [departmentName, setDepartmentName] = useState('');
-  const [tenderStatus, setTenderStatus] = useState('');
-  const [tenderId, setTenderId] = useState('');
-  const [quantityOperator, setQuantityOperator] = useState('>=');
-  const [quantityValue, setQuantityValue] = useState('');
-  const [valueOperator, setValueOperator] = useState('=');
-  const [valueFrom, setValueFrom] = useState('');
-  const [valueTo, setValueTo] = useState('');
-  const [valueUnit, setValueUnit] = useState('Lakh');
-
-
-  const filteredTenders = useMemo(() => {
-    return tenders.filter(tender => {
-      if (searchKeyword) {
-        const q = searchKeyword.toLowerCase();
-        if (!tender.title.toLowerCase().includes(q) && !tender.T_ID.toLowerCase().includes(q)) {
-          return false;
-        }
-      }
-
-      if (referenceNumber && !tender.T_ID.toLowerCase().includes(referenceNumber.toLowerCase())) {
-        return false;
-      }
-
-      if (selectedState && tender.state !== selectedState) {
-        return false;
-      }
-
-      if (city && !tender.location.toLowerCase().includes(city.toLowerCase())) {
-        return false;
-      }
-
-      if (departmentName && !tender.department.toLowerCase().includes(departmentName.toLowerCase())) {
-        return false;
-      }
-
-      if (tenderStatus && tender.status !== tenderStatus) {
-        return false;
-      }
-
-      if (tenderId && !tender.T_ID.toLowerCase().includes(tenderId.toLowerCase())) {
-        return false;
-      }
-
-      if (quantityValue) {
-        const qty = parseInt(quantityValue, 10);
-        if (!isNaN(qty)) {
-          if (quantityOperator === '>=' && tender.qty < qty) return false;
-          if (quantityOperator === '<=' && tender.qty > qty) return false;
-          if (quantityOperator === '=' && tender.qty !== qty) return false;
-        }
-      }
-
-      if (valueFrom) {
-        const multiplier = valueUnit === 'Lakh' ? 1 : 100;
-        const fromVal = parseFloat(valueFrom) * multiplier;
-        if (!isNaN(fromVal)) {
-          if (valueOperator === '=' && tender.value !== fromVal) return false;
-          if (valueOperator === '>=' && tender.value < fromVal) return false;
-          if (valueOperator === '<=' && tender.value > fromVal) return false;
-
-          if (valueTo && valueOperator === '=') {
-            const toVal = parseFloat(valueTo) * multiplier;
-            if (!isNaN(toVal) && (tender.value < fromVal || tender.value > toVal)) return false;
-          }
-        }
-      }
-
-      return true;
-    });
-  }, [tenders, searchKeyword, referenceNumber, selectedState, city, departmentName, tenderStatus, tenderId, quantityOperator, quantityValue, valueOperator, valueFrom, valueTo, valueUnit]);
+  }, [currentPage, sortOrder, searchKeyword, referenceNumber, city, departmentName, tenderId, quantityOperator, quantityValue, valueOperator, valueFrom, valueTo, valueUnit]);
 
   const sortedTenders = useMemo(() => {
-    const sorted = [...filteredTenders].sort((a, b) => {
+    const sorted = [...tenders].sort((a, b) => {
       return sortOrder === 'asc' ? a.value - b.value : b.value - a.value;
     });
     return sorted;
-  }, [filteredTenders, sortOrder]);
+  }, [tenders, sortOrder]);
 
-  const handleAction = (action, tenderData) => {
-    if (action === 'status') {
-      setSelectedTender(tenderData);
-      setShowStatusModal(true);
-    } else if (action === 'download') {
-      alert(`Downloading archived tender ${tenderData} (mock)`);
-      console.log(`Download Archived Tender: ${tenderData}`);
-    } else {
-      console.log(`Action: ${action} on Archived Tender: ${tenderData}`);
+  const handleAction = (action, tender) => {
+    if (action === 'download') {
+      if (tender.detail_url) {
+        window.open(tender.detail_url, '_blank', 'noopener,noreferrer');
+      } else {
+        alert('Detail URL not available');
+      }
+      return;
     }
+
+    if (action === 'status') {
+      setSelectedTender(tender);
+      setShowStatusModal(true);
+      return;
+    }
+
+    console.log(`Action: ${action}`, tender);
   };
+
 
   const handleToggleInterest = async (tid) => {
     try {
       const token = localStorage.getItem('token');
 
-      await fetch(
+      const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/tenders/${encodeURIComponent(tid)}/interest`,
         {
           method: 'PATCH',
@@ -513,13 +543,26 @@ export default function ArchivePage() {
         }
       );
 
-      setTenders(prev =>
-        prev.map(t =>
-          t.T_ID === tid ? { ...t, interested: !t.interested } : t
-        )
-      );
+      const data = await response.json();
+
+      if (data.success) {
+        // Update the local state with the new interest status
+        setTenders(prev =>
+          prev.map(t =>
+            t.T_ID === tid ? { ...t, interested: data.data.is_interested === 1 } : t
+          )
+        );
+        
+        // Show success message
+        console.log(data.message);
+      } else {
+        // Show error message
+        console.error('Failed to toggle interest:', data.message);
+        alert(data.message || 'Failed to update interest status');
+      }
     } catch (err) {
       console.error('Failed to toggle interest', err);
+      alert('Failed to update interest status. Please try again.');
     }
   };
 
@@ -530,7 +573,6 @@ export default function ArchivePage() {
     setSelectedState('');
     setCity('');
     setDepartmentName('');
-    setTenderStatus('');
     setTenderId('');
     setQuantityOperator('>=');
     setQuantityValue('');
@@ -543,8 +585,8 @@ export default function ArchivePage() {
 
   const handleSearch = () => {
     setCurrentPage(1);
-    fetchTenders();
   };
+
 
 
   return (
@@ -677,18 +719,21 @@ export default function ArchivePage() {
       </div>
 
       <div className="tenders-list-compact">
-        {tenders.map((tender, index) => (
-          <TenderRow
-            key={tender.T_ID}
-            tender={tender}
-            serialNumber={(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
-            onAction={handleAction}
-            onToggleInterest={handleToggleInterest}
-          />
-        ))}
-
-
+        {loading
+          ? Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => (
+            <TenderSkeleton key={i} />
+          ))
+          : sortedTenders.map((tender, index) => (
+            <TenderRow
+              key={tender.T_ID}
+              tender={tender}
+              serialNumber={(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
+              onAction={handleAction}
+              onToggleInterest={handleToggleInterest}
+            />
+          ))}
       </div>
+
 
       {sortedTenders.length === 0 && (
         <div className="archive-no-results">No archived tenders found matching your filters.</div>

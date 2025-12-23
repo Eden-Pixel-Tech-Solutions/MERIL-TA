@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import '../assets/css/login.css';
 import ADIA from '../assets/img/ADIA.jpeg';
-import recep from '../assets/img/TjVxT1R2cUMvMStHaUdWZXRYYzlDUT09.webp';
-import ppl from '../assets/img/ppl.webp';
+import recep from '../assets/img/2.jpg';
+import ppl from '../assets/img/1.jpg';
 import API_BASE_URL from '../config/api';
+
+//logo
+import Logo from '../assets/img/logo.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -17,24 +20,24 @@ const Login = () => {
 
   const slides = [
     {
-      title: "Discover Tenders.",
-      subtitle: "Bid With Confidence.",
+      title: "",
+      subtitle: "",
       description:
-        "Access government and private tenders tailored to Meril’s product portfolio, with complete details, timelines, and eligibility criteria.",
+        "",
       image: ADIA
     },
     {
-      title: "Analyze Competition.",
-      subtitle: "Track Winners.",
+      title: " ",
+      subtitle: "",
       description:
-        "View competitor participation, awarded bidders, and historical pricing insights to plan smarter bidding strategies.",
+        "",
       image: recep
     },
     {
-      title: "Bid. Track. Win.",
-      subtitle: "All in One Platform.",
+      title: "",
+      subtitle: "",
       description:
-        "Manage tender listings, submissions, bid status, and award outcomes seamlessly — built to support Meril’s tender operations end-to-end.",
+        "",
       image: ppl
     }
   ];
@@ -112,12 +115,6 @@ const Login = () => {
           <div className="background-overlay" />
         </div>
 
-        <div className="logo">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
-          </svg>
-          <span>Meril Tenders</span>
-        </div>
 
         <div className="carousel">
           {slides.map((slide, index) => (
@@ -146,6 +143,7 @@ const Login = () => {
       {/* Right Section - Login Form */}
       <div className="right-section">
         <div className="login-form-container">
+          <img src={Logo} alt="Logo" style={{alignContent: 'center'}} className='LogoDesign' />
           <h2>Welcome Back!</h2>
           <p className="subtitle">Log in to start creating stunning videos with ease.</p>
 

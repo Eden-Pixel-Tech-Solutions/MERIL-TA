@@ -46,6 +46,8 @@ import CompareBidders from "./pages/Insights/CompareBidders";
 import Distributors from "./pages/Dealers/Distributors";
 import Oems from "./pages/Dealers/Oems";
 
+import Sample from "./pages/Tenders/sample";
+
 /* -------------------------
    AUTH + ROLE GUARD
 ------------------------- */
@@ -170,6 +172,15 @@ const AppLayout = () => {
           />
 
           {/* ================= SHARED ROUTES ================= */}
+          <Route
+            path="/tenders/tenderdetails/:tenderId"
+            element={
+              <ProtectedRoute allowedRoles={["Admin", "User"]}>
+                <TenderDetails />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/workspace/:tenderId"
             element={

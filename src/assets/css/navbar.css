@@ -1,17 +1,25 @@
 /* =====================================================
-   NAVBAR THEME COLORS (BLUE + WHITE)
+   NAVBAR THEME COLORS (ENHANCED FOR BLUE BACKGROUND)
 ===================================================== */
 :root {
-  --navbar-bg: #ffffff;
-  --navbar-accent: #084f9a;        /* Blue */
-  --navbar-accent-dark: #084f9a;   /* Dark Blue */
-  --navbar-text: #1f2937;          /* Almost Black */
-  --navbar-text-light: #6b7280;
-  --navbar-border: #e5e7eb;
-  --navbar-hover-bg: #f3f4f6;
-  --navbar-shadow: rgba(0, 0, 0, 0.08);
-  --navbar-height: 64px;
+  --navbar-bg: #05339C;
+  --navbar-accent: #FEC91B;              /* Golden/Yellow accent */
+  --navbar-accent-dark: #e6b517;         /* Darker golden */
+  --navbar-text: #ffffff;                /* White text */
+  --navbar-text-light: #e0e0e0;          /* Light gray text */
+  --navbar-border: #ffffff20;            /* Semi-transparent white border */
+  --navbar-hover-bg: #ffffff15;          /* Light white overlay on hover */
+  --navbar-shadow: rgba(0, 0, 0, 0.15);
+  --navbar-height: 88px;
   --navbar-transition: 0.25s ease;
+  
+  /* Dropdown colors - Light theme */
+  --dropdown-bg: #ffffff;                /* White background */
+  --dropdown-text: #2c3e50;              /* Dark blue-gray text */
+  --dropdown-hover-bg: #f8f9fa;          /* Very light gray hover */
+  --dropdown-hover-text: #05339C;        /* Blue hover text */
+  --dropdown-border: #e5e7eb;            /* Light gray border */
+  --dropdown-shadow: rgba(0, 0, 0, 0.1);
 }
 
 /* =====================================================
@@ -35,7 +43,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--navbar-bg);
   height: var(--navbar-height);
   padding: 0 1.75rem;
   border-bottom: 1px solid var(--navbar-border);
@@ -43,6 +50,11 @@
   position: sticky;
   top: 0;
   z-index: 999;
+  background-image: 
+    linear-gradient(rgba(5, 51, 156, 0.5), rgba(5, 51, 156, 0.5)), /* Color overlay */
+    url('../img/companybg.jpg'); /* Background image */
+  background-size: cover;
+  background-position: center;
 }
 
 /* =====================================================
@@ -51,19 +63,20 @@
 .navbar-brand {
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--navbar-accent);
+  color: var(--navbar-text);
   cursor: pointer;
 }
 
 .navbar-logo-text {
   font-size: 1.35rem;
   font-weight: 700;
-  color: var(--navbar-accent);
+  color: var(--navbar-text);
   text-decoration: none;
+  transition: opacity var(--navbar-transition);
 }
 
 .navbar-logo-text:hover {
-  color: var(--navbar-accent-dark);
+  opacity: 0.9;
 }
 
 /* =====================================================
@@ -114,21 +127,26 @@
   border: none;
   color: var(--navbar-text);
   padding: 0.75rem 1rem;
-  font-size: 0.95rem;
+  font-size: 0.90rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.25rem;
   cursor: pointer;
-  transition: color var(--navbar-transition);
+  transition: all var(--navbar-transition);
+  border-radius: 6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.3px;
 }
 
 .navbar-link:hover {
+  background: var(--navbar-hover-bg);
   color: var(--navbar-accent);
 }
 
 .dropdown-arrow {
   font-size: 0.65rem;
-  transition: var(--navbar-transition);
+  transition: transform var(--navbar-transition);
 }
 
 .navbar-item:hover .dropdown-arrow {
@@ -136,18 +154,18 @@
 }
 
 /* =====================================================
-   DROPDOWN MENU
+   DROPDOWN MENU (LIGHT THEME)
 ===================================================== */
 .navbar-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
-  background: var(--navbar-bg);
-  border: 1px solid var(--navbar-border);
-  border-radius: 6px;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+  border-radius: 8px;
   min-width: 220px;
-  padding: 0.4rem 0;
-  box-shadow: 0 4px 12px var(--navbar-shadow);
+  padding: 0.5rem 0;
+  box-shadow: 0 8px 24px var(--dropdown-shadow);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px);
@@ -162,22 +180,33 @@
 }
 
 .navbar-dropdown-item {
-  padding: 0.7rem 1.25rem;
+  padding: 0.75rem 1.25rem;
   font-size: 0.9rem;
-  color: var(--navbar-text);
+  font-weight: 500;
+  color: var(--dropdown-text);
   text-decoration: none;
   display: block;
   transition: background-color var(--navbar-transition),
               color var(--navbar-transition);
+  border-left: 3px solid transparent;
 }
 
 .navbar-dropdown-item:hover {
-  background: var(--navbar-hover-bg);
-  color: var(--navbar-accent);
+  background: var(--dropdown-hover-bg);
+  color: var(--dropdown-hover-text);
+  border-left-color: var(--navbar-accent);
+}
+
+/* Active route indicator in dropdown */
+.navbar-dropdown-item[aria-current="page"] {
+  background: var(--dropdown-hover-bg);
+  color: var(--dropdown-hover-text);
+  border-left-color: var(--navbar-accent);
+  font-weight: 600;
 }
 
 /* =====================================================
-   PROFILE SECTION
+   PROFILE SECTION (LIGHT THEME)
 ===================================================== */
 .navbar-profile {
   position: relative;
@@ -185,32 +214,41 @@
 
 .navbar-profile-btn {
   background: none;
-  border: none;
+  border: 2px solid var(--navbar-text);
+  border-radius: 50%;
   cursor: pointer;
+  padding: 0;
+  transition: all var(--navbar-transition);
+}
+
+.navbar-profile-btn:hover {
+  border-color: var(--navbar-accent);
+  transform: scale(1.05);
 }
 
 .navbar-avatar {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: var(--navbar-accent);
-  color: white;
+  background: var(--navbar-text);
+  color: var(--navbar-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
+  overflow: hidden;
 }
 
 .navbar-profile-dropdown {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background: var(--navbar-bg);
-  border: 1px solid var(--navbar-border);
-  border-radius: 6px;
-  box-shadow: 0 4px 12px var(--navbar-shadow);
-  width: 170px;
-  padding: 0.4rem 0;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px var(--dropdown-shadow);
+  width: 180px;
+  padding: 0.5rem 0;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px);
@@ -224,16 +262,25 @@
 }
 
 .navbar-profile-item {
-  padding: 0.7rem 1rem;
-  color: var(--navbar-text);
+  padding: 0.75rem 1rem;
+  color: var(--dropdown-text);
+  font-weight: 500;
   text-decoration: none;
   display: block;
-  transition: background var(--navbar-transition), color var(--navbar-transition);
+  transition: background var(--navbar-transition), 
+              color var(--navbar-transition);
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-left: 3px solid transparent;
 }
 
 .navbar-profile-item:hover {
-  background: var(--navbar-hover-bg);
-  color: var(--navbar-accent);
+  background: var(--dropdown-hover-bg);
+  color: var(--dropdown-hover-text);
+  border-left-color: var(--navbar-accent);
 }
 
 /* =====================================================
@@ -255,6 +302,7 @@
     padding: 1rem 0;
     transform: translateX(-100%);
     transition: transform var(--navbar-transition);
+    overflow-y: auto;
   }
 
   .navbar-menu.mobile-open {
@@ -279,6 +327,8 @@
     max-height: 0;
     overflow: hidden;
     transition: max-height var(--navbar-transition);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0;
   }
 
   .navbar-dropdown.active {
@@ -287,5 +337,50 @@
 
   .navbar-dropdown-item {
     padding: 1rem 2.5rem;
+    color: var(--navbar-text-light);
+    border-left: 3px solid transparent;
   }
+
+  .navbar-dropdown-item:hover {
+    background: var(--navbar-hover-bg);
+    color: var(--navbar-text);
+    border-left-color: var(--navbar-accent);
+  }
+}
+
+/* =====================================================
+   ADDITIONAL STYLES
+===================================================== */
+.FlagImg {
+  width: 85px;
+  height: 63px;
+  padding-bottom: 13.5px;
+}
+
+.LogoImg {
+  width: 85px;
+  height: 83px;
+  padding-bottom: 13.5px;
+  padding-top: 15px;
+}
+
+.GoldenLine {
+  padding-top: 5px;
+  height: 3px;
+  background-color: #FEC91B;
+  margin: 0;
+  border: none;
+}
+
+.gaper {
+  width: 150px;
+  color: #9c050500;
+  opacity: 0;
+}
+
+.UserProfile {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
 }
