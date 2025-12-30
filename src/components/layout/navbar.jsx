@@ -65,8 +65,8 @@ const Navbar = () => {
     {
       label: "Tender Workdesk",
       items: [
-        { name: "Active Workspaces", path: "/workdesk/active-workspaces" },
-
+        { name: "Workdesk", path: `${basePath}/workdesk` },
+        { name: "Active Workspaces", path: `${basePath}/workdesk/active-workspaces` },
       ],
     },
     {
@@ -191,7 +191,7 @@ const Navbar = () => {
         {/* Brand / Logo */}
         <div className="navbar-brand">
           <Link to="/" className="navbar-logo-text" aria-label="Meril Tenders Home">
-            <img src={Logo} alt="" className="LogoImg"/>
+            <img src={Logo} alt="" className="LogoImg" />
             <span className="gaper">sd</span>
             <img src={Flag} alt="" className="FlagImg" />
           </Link>

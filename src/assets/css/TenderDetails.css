@@ -644,6 +644,12 @@ body {
   font-weight: 600;
 }
 
+.feature-btn.interested-active {
+  background-color: #fee2e2;
+  color: #dc2626;
+  font-weight: 600;
+}
+
 .feature-btn .icon {
   font-size: 18px;
   min-width: 20px;
@@ -1163,4 +1169,10 @@ body {
     left: 10px;
     padding: 12px 16px;
   }
+}
+
+.btn-download:hover {
+  background-color: #063d7a;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(8, 79, 154, 0.3);
 }

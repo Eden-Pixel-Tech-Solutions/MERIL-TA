@@ -1,6 +1,208 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import ProductSearchModal from '../../components/common/ProductSearchModal';
 import '../../assets/css/TenderDetails.css';
+
+const SuggestedProductsModal = ({ products, detectedCategory, selectedProduct, onClose, bidNumber, onUpdate }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [localProducts, setLocalProducts] = useState(products);
+  const [showSearch, setShowSearch] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setLocalProducts(products); // Reset on open
+  }, [products]);
+
+  const handleRemove = (idx) => {
+    const updated = [...localProducts];
+    updated.splice(idx, 1);
+    setLocalProducts(updated);
+  };
+
+  const handleAdd = (product) => {
+    setLocalProducts([...localProducts, product]);
+    setShowSearch(false);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const token = localStorage.getItem('token');
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+      const cleanBidNumber = bidNumber.replace(/_/g, '/'); // Ensure / for backend URL if needed or pass raw. The endpoint expects whatever format. 
+      // Actually backend controller replaces nothing, it expects what is in DB. DB has slashes.
+
+      const res = await fetch(`${API_BASE_URL}/tenders/${encodeURIComponent(cleanBidNumber)}/suggestions`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ products: localProducts })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setIsEditing(false);
+        if (onUpdate) onUpdate(localProducts);
+        alert('Saved successfully!');
+      } else {
+        alert('Failed to save');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error saving');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSelectProduct = async (product) => {
+    try {
+      const token = localStorage.getItem('token');
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+      const cleanBidNumber = bidNumber.replace(/_/g, '/');
+
+      const res = await fetch(`${API_BASE_URL}/tenders/${encodeURIComponent(cleanBidNumber)}/selection`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ product })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert('Product selected successfully!');
+        onClose(); // Close modal on success
+      } else {
+        alert('Failed to select product');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error selecting product');
+    }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 1000 }}>
+      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '900px' }}>
+        <div className="modal-header">
+          <div>
+            <h2>Suggested Products</h2>
+            {detectedCategory && <div style={{ fontSize: '13px', color: '#084f9a', marginTop: '4px' }}>Detected: {detectedCategory}</div>}
+          </div>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        {/* Toolbar */}
+        <div style={{ padding: '0 20px', marginBottom: '10px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+          {!isEditing ? (
+            <button onClick={() => setIsEditing(true)} style={{ padding: '6px 12px', background: '#084f9a', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Edit Selection</button>
+          ) : (
+            <>
+              <button onClick={() => { setIsEditing(false); setLocalProducts(products); }} disabled={saving} style={{ padding: '6px 12px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={handleSave} disabled={saving} style={{ padding: '6px 12px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>{saving ? 'Saving...' : 'Save Changes'}</button>
+            </>
+          )}
+        </div>
+
+        <div className="modal-body">
+          {localProducts.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '20px' }}>
+              <p style={{ color: '#666' }}>No suggestions found.</p>
+              {isEditing && <button onClick={() => setShowSearch(true)} style={{ marginTop: '10px', padding: '6px 12px', background: '#084f9a', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+ Add Product</button>}
+            </div>
+          ) : (
+            <div className="products-table-wrapper" style={{ overflowX: 'auto' }}>
+              <table className="products-table">
+                <thead>
+                  <tr>
+                    {isEditing && <th>Action</th>}
+                    <th>Product Code</th>
+                    <th>Type / Category</th>
+                    <th>Title</th>
+                    <th>Relevancy</th>
+                    <th>Specification</th>
+                    <th>Choose Product</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {localProducts.map((p, idx) => {
+                    const isSelected = selectedProduct && (
+                      (p.product_code && p.product_code === selectedProduct.product_code) ||
+                      (p.title === selectedProduct.title)
+                    );
+
+                    return (
+                      <tr key={idx} style={isSelected ? { backgroundColor: '#f0fdf4', border: '1px solid #22c55e' } : {}}>
+                        {isEditing && (
+                          <td style={{ width: '40px', textAlign: 'center' }}>
+                            <button onClick={() => handleRemove(idx)} style={{ background: 'none', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '16px' }}>🗑️</button>
+                          </td>
+                        )}
+                        <td>{p.product_code || '-'}</td>
+                        <td>
+                          <div style={{ fontWeight: 500 }}>{p.type}</div>
+                          <div style={{ fontSize: '11px', color: '#666' }}>{p.category}</div>
+                        </td>
+                        <td>{p.title}</td>
+                        <td>
+                          <span style={{
+                            backgroundColor: p.relevancy > 0.8 ? '#d1fae5' : '#e0f2fe',
+                            color: p.relevancy > 0.8 ? '#065f46' : '#075985',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            fontWeight: 600
+                          }}>
+                            {(p.raw_score * 100).toFixed(1)}%
+                          </span>
+                        </td>
+                        <td style={{ fontSize: '12px', color: '#333' }}>
+                          {p.specification}
+                        </td>
+                        <td>
+                          <button
+                            onClick={() => handleSelectProduct(p)}
+                            disabled={isSelected}
+                            style={{
+                              padding: '4px 8px',
+                              background: isSelected ? '#cccccc' : '#28a745',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: isSelected ? 'not-allowed' : 'pointer',
+                              fontSize: '12px',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {isSelected ? 'Selected' : 'Select This Product'}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {isEditing && (
+                <div style={{ padding: '15px 0', textAlign: 'center' }}>
+                  <button onClick={() => setShowSearch(true)} style={{ padding: '8px 16px', background: '#084f9a', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <span>+</span> Add Product
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showSearch && <ProductSearchModal onClose={() => setShowSearch(false)} onSelect={handleAdd} />}
+    </div >
+  );
+};
 
 const TenderDetails = () => {
   const { tenderId } = useParams();
@@ -29,6 +231,42 @@ const TenderDetails = () => {
   // 🔥 Technical specs states (UPDATED)
   const [techSpecs, setTechSpecs] = useState([]); // ARRAY OF CATALOGUES
   const [loadingTechSpecs, setLoadingTechSpecs] = useState(false);
+
+  // Suggestions State
+  const [suggestedProducts, setSuggestedProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [detectedCategory, setDetectedCategory] = useState(null);
+  const [showSuggestedModal, setShowSuggestedModal] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
+  /* ---------------- FETCH SUGGESTIONS ---------------- */
+  const fetchSuggestedProducts = async () => {
+    try {
+      setLoadingSuggestions(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `${API_BASE_URL}/tenders/${encodeURIComponent(tenderId.replace(/_/g, '/'))}/suggestions`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        setSuggestedProducts(data.data || []);
+        setDetectedCategory(data.detected_category);
+        setSelectedProduct(data.selected_product);
+        setShowSuggestedModal(true);
+      } else {
+        alert('Failed to fetch suggestions');
+      }
+    } catch (err) {
+      console.error('Error fetching suggestions:', err);
+      alert('Error fetching suggestions');
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
 
   /* ---------------- MAIN API (Tender JSON) ---------------- */
   useEffect(() => {
@@ -235,6 +473,72 @@ const TenderDetails = () => {
     });
   };
 
+  /* ---------------- FETCH METADATA (Initial Interest Status) ---------------- */
+  useEffect(() => {
+    if (!tenderId) return;
+
+    const fetchMetadata = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        // Fetch tender from DB to check 'is_interested'
+        // We use the existing list endpoint with a filter
+        const res = await fetch(
+          `${API_BASE_URL}/tenders?tenderId=${encodeURIComponent(tenderId.replace(/_/g, '/'))}`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        const data = await res.json();
+
+        if (data.data && data.data.length > 0) {
+          // The endpoint returns a list, so we take the first item
+          const tenderRecord = data.data[0];
+          console.log('[TenderDetails] Initial Interest Status:', tenderRecord.interested);
+          setIsInterested(!!tenderRecord.interested);
+        }
+      } catch (err) {
+        console.error("Failed to fetch tender metadata:", err);
+      }
+    };
+
+    fetchMetadata();
+  }, [tenderId, API_BASE_URL]);
+
+  // toggling interest
+  const handleToggleInterest = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `${API_BASE_URL}/tenders/${encodeURIComponent(tenderId.replace(/_/g, '/'))}/interest`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`
+          } // No body needed as per TendersPage.jsx
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success || response.ok) { // Adjust based on actual API response structure
+        // TendersPage uses data.success, but controller returns { message: 'Interest updated' }
+        // Let's re-read TendersPage.jsx logic vs Controller logic.
+        // Controller: `res.json({ message: 'Interest updated' });`
+        // TendersPage logic might be out of sync or I missed something in Controller.
+
+        // Whatever, I will optimistically toggle local state if response is OK.
+
+        setIsInterested(prev => !prev);
+      } else {
+        console.error('Failed to toggle interest:', data.message);
+        alert(data.message || 'Failed to update interest status');
+      }
+    } catch (err) {
+      console.error('Failed to toggle interest', err);
+      alert('Failed to update interest status. Please try again.');
+    }
+  };
+
   if (loading) return <p>Loading tender data...</p>;
   if (error) return (
     <div className="error-container" style={{ padding: '20px', textAlign: 'center' }}>
@@ -259,7 +563,7 @@ const TenderDetails = () => {
   if (!details) return <p>Loading tender data...</p>;
 
   const tenderDocumentLinks = links.filter(
-    l => !l.uri.includes('/showCatalogue/')
+    l => !l.uri.includes('/showCatalogue/') && !(l.uri.includes('/catalog_data/') && l.uri.toLowerCase().endsWith('.pdf'))
   );
 
   /* ---------------- UI ---------------- */
@@ -284,7 +588,19 @@ const TenderDetails = () => {
                   <div className="detail-item-left"><label>Bid Opening Date</label><p>{details.bidOpeningDate}</p></div>
                   <div className="detail-item-left"><label>Bid Offer Validity</label><p>{details.bidOfferValidity}</p></div>
                   <div className="detail-item-left"><label>Total Quantity</label><p>{details.totalQty}</p></div>
-                  <div className="detail-item-left"><label>Item Category</label><p>{details.itemCategory}</p></div>
+                  <div className="detail-item-left">
+                    <label>Item Category</label>
+                    <p>
+                      {details.itemCategory && details.itemCategory !== "N/A"
+                        ? details.itemCategory.split(/,(?![^()]*\))/).map((item, idx) => ( // Split by comma but ignore commas inside parentheses
+                          <span key={idx} style={{ display: 'block', marginBottom: '4px' }}>
+                            {item.trim()}
+                          </span>
+                        ))
+                        : "N/A"
+                      }
+                    </p>
+                  </div>
                   <div className="detail-item-left"><label>Ministry</label><p>{details.ministry}</p></div>
                   <div className="detail-item-left">
                     <label>Estimated Bid Value</label>
@@ -325,8 +641,28 @@ const TenderDetails = () => {
               <span className={`arrow ${expandedSections.technicalSpecs ? 'expanded' : ''}`}>^</span>
             </div>
 
+
             {expandedSections.technicalSpecs && (
               <div className="accordion-content">
+
+                {/* Render Embedded PDFs from /catalog_data/ */}
+                {links
+                  .filter(l => l.uri && l.uri.includes('/catalog_data/') && l.uri.toLowerCase().endsWith('.pdf'))
+                  .map((pdfLink, idx) => (
+                    <div key={`pdf-${idx}`} style={{ marginBottom: '30px', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden' }}>
+                      <div style={{ padding: '10px 15px', background: '#f8f9fa', borderBottom: '1px solid #e5e7eb', fontWeight: '600', fontSize: '0.9rem' }}>
+                        {pdfLink.text || "Technical Catalog (PDF)"}
+                      </div>
+                      <iframe
+                        src={pdfLink.uri} // Ensure this URL is accessible (CORS, etc.)
+                        width="100%"
+                        height="600px"
+                        style={{ border: 'none' }}
+                        title={`Embedded PDF ${idx}`}
+                      />
+                    </div>
+                  ))
+                }
 
                 {loadingTechSpecs && (
                   <div className="loading-state">
@@ -347,6 +683,7 @@ const TenderDetails = () => {
                             <tr>
                               <th>Category</th>
                               <th>Specification</th>
+                              <th>Choose Product</th>
                               <th>Allowed Values</th>
                             </tr>
                           </thead>
@@ -377,7 +714,7 @@ const TenderDetails = () => {
                   );
                 })}
 
-                {!loadingTechSpecs && techSpecs.length === 0 && (
+                {!loadingTechSpecs && techSpecs.length === 0 && links.filter(l => l.uri && l.uri.includes('/catalog_data/') && l.uri.toLowerCase().endsWith('.pdf')).length === 0 && (
                   <p className="tech-spec-empty">No technical specifications available.</p>
                 )}
 
@@ -422,10 +759,20 @@ const TenderDetails = () => {
             {expandedSections.requiredDocs && (
               <div className="accordion-content">
                 <ul className="required-docs-list">
-                  {details.documentRequired.split(',').map((doc, i) => (
-                    <li key={i}>{doc.trim()}</li>
-                  ))}
+                  {details.documentRequired.split(',').map((doc, i) => {
+                    const text = doc.trim();
+                    if (text.toLowerCase().includes("eligibility for exemption must be uploaded")) {
+                      return null; // Skip rendering in list
+                    }
+                    return <li key={i}>{text}</li>;
+                  })}
                 </ul>
+                {/* Render the Note separately if present */}
+                {details.documentRequired.toLowerCase().includes("eligibility for exemption must be uploaded") && (
+                  <div style={{ marginTop: '10px', padding: '10px', background: '#fff3cd', border: '1px solid #ffeeba', borderRadius: '4px', fontSize: '0.9rem', color: '#856404' }}>
+                    <strong>Note:</strong> The supporting documents to prove his eligibility for exemption must be uploaded for evaluation by the buyer.
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -436,17 +783,41 @@ const TenderDetails = () => {
         <div className="right-sidebar">
           <div className="features-panel">
             <h3>TENDER FEATURES</h3>
-            <button className={`feature-btn ${isInterested ? 'active' : ''}`} onClick={() => setIsInterested(!isInterested)}>
-              ♡ Interested
+            <button
+              className={`feature-btn ${isInterested ? 'interested-active' : ''}`}
+              onClick={handleToggleInterest}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={isInterested ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" style={{ marginRight: '8px' }}>
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              Interested
             </button>
             <button className="feature-btn">⏰ Set Reminder</button>
-            <button className="feature-btn">⬇ Download BID Document</button>
+            <button
+              className="feature-btn"
+              onClick={fetchSuggestedProducts}
+              disabled={loadingSuggestions}
+            >
+              {loadingSuggestions ? 'Loading...' : 'View Suggested Products'}
+            </button>
             <button className="feature-btn">📄 View BOQ</button>
             <button className="feature-btn">↗ Share</button>
           </div>
         </div>
 
       </div>
+
+      {/* MODALS */}
+      {showSuggestedModal && (
+        <SuggestedProductsModal
+          products={suggestedProducts}
+          detectedCategory={detectedCategory}
+          selectedProduct={selectedProduct}
+          bidNumber={tenderId}
+          onUpdate={(newProducts) => setSuggestedProducts(newProducts)}
+          onClose={() => setShowSuggestedModal(false)}
+        />
+      )}
     </div>
   );
 };

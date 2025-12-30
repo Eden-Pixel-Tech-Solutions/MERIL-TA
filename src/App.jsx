@@ -24,6 +24,9 @@ import TenderDetails from "./pages/Tenders/TenderDetails";
 // Workdesk
 import ActiveWorkspaces from "./pages/Workdesk/ActiveWorkspaces";
 import Workspaces from "./pages/Workdesk/Workspaces";
+import Workdesk from "./pages/Workdesk/Workdesk";
+import DocumentEditor from "./pages/Workdesk/DocumentEditor";
+import RepresentationDocumentEditor from "./pages/Workdesk/RepresentationDocumentEditor";
 
 // Orders
 import GEMContracts from "./pages/Orders/GEMContracts";
@@ -151,6 +154,14 @@ const AppLayout = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/Admin/workdesk"
+            element={
+              <ProtectedRoute allowedRoles={["Admin"]}>
+                <Workdesk />
+              </ProtectedRoute>
+            }
+          />
 
           {/* ================= USER ROUTES ================= */}
           <Route
@@ -182,10 +193,29 @@ const AppLayout = () => {
           />
 
           <Route
-            path="/workspace/:tenderId"
+            path="/workspace/*"
             element={
               <ProtectedRoute allowedRoles={["Admin", "User"]}>
                 <Workspaces />
+              </ProtectedRoute>
+            }
+          />
+
+
+          <Route
+            path="/workspace/:tenderId/doc-editor/:taskId"
+            element={
+              <ProtectedRoute allowedRoles={["Admin", "User"]}>
+                <DocumentEditor />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/workspace/:tenderId/rep-editor"
+            element={
+              <ProtectedRoute allowedRoles={["Admin", "User"]}>
+                <RepresentationDocumentEditor />
               </ProtectedRoute>
             }
           />

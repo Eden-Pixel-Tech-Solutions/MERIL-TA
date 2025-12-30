@@ -145,7 +145,7 @@ const Login = () => {
         <div className="login-form-container">
           <img src={Logo} alt="Logo" style={{alignContent: 'center'}} className='LogoDesign' />
           <h2>Welcome Back!</h2>
-          <p className="subtitle">Log in to start creating stunning videos with ease.</p>
+          <p className="subtitle">Tender System</p>
 
           <div className="login-form">
             <div className="form-group">

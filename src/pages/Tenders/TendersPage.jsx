@@ -1,6 +1,6 @@
 // src/pages/Archive/ArchivePage.jsx
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import '../../assets/css/TendersPage.css';
 
@@ -28,7 +28,7 @@ const TenderStatusModal = ({ tender, onClose }) => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const token = localStorage.getItem('token');
         const response = await fetch(
           `${import.meta.env.VITE_API_BASE_URL}/tenders/${encodeURIComponent(tender.T_ID)}/status/history`,
@@ -38,7 +38,7 @@ const TenderStatusModal = ({ tender, onClose }) => {
         );
 
         const data = await response.json();
-        
+
         if (data.success) {
           setStatusHistory(data.data || []);
         } else {
@@ -59,11 +59,11 @@ const TenderStatusModal = ({ tender, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       setSubmitting(true);
       setError(null);
-      
+
       const token = localStorage.getItem('token');
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/tenders/${encodeURIComponent(tender.T_ID)}/status`,
@@ -81,14 +81,14 @@ const TenderStatusModal = ({ tender, onClose }) => {
       );
 
       const data = await response.json();
-      
+
       if (data.success) {
         // Add the new status to the history
         setStatusHistory(prev => [data.data, ...prev]);
-        
+
         // Reset form
         setFormData({ status: 'proceed', remark: '' });
-        
+
         alert(`Status updated successfully for Tender ${tender.T_ID}`);
       } else {
         setError(data.message || 'Failed to update status');
@@ -115,7 +115,7 @@ const TenderStatusModal = ({ tender, onClose }) => {
               {error}
             </div>
           )}
-          
+
           <div className="form-group">
             <label htmlFor="tender-status">Tender Status:</label>
             <select
@@ -437,9 +437,10 @@ export default function ArchivePage() {
   const [valueFrom, setValueFrom] = useState('');
   const [valueTo, setValueTo] = useState('');
   const [valueUnit, setValueUnit] = useState('Lakh');
+  const scrapedQueriesRef = useRef(new Set());
 
   useEffect(() => {
-    const fetchTenders = async () => {
+    const fetchTenders = async (isRetry = false) => {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
@@ -471,6 +472,55 @@ export default function ArchivePage() {
 
         const data = await res.json();
 
+        // Fallback Scraping Logic
+        if (
+          (!data.data || data.data.length === 0) && // No results found
+          searchKeyword &&                          // User is searching for something
+          !scrapedQueriesRef.current.has(searchKeyword) && // We haven't scraped this yet
+          !isRetry                                  // Not a retry call
+        ) {
+          console.log(`No results found for "${searchKeyword}". Attempting fallback scrape...`);
+
+          try {
+            const SCRAPER_API = import.meta.env.VITE_SCRAPER_API || 'http://localhost:8007';
+
+            const scrapeRes = await fetch(`${SCRAPER_API}/scrape`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                query: searchKeyword.trim()
+              })
+            });
+
+            const scrapeData = await scrapeRes.json();
+
+            if (scrapeRes.ok && scrapeData.status === 'success') {
+              console.log('Scraping completed:', scrapeData.message);
+
+              scrapedQueriesRef.current.add(searchKeyword);
+
+              await fetchTenders(true);
+              return;
+            } else {
+              console.warn('Scraping failed:', scrapeData);
+            }
+
+
+            if (scrapeRes.ok) {
+              console.log("Scraping successful. Retrying fetch...");
+              scrapedQueriesRef.current.add(searchKeyword);
+              await fetchTenders(true);
+              return;
+            } else {
+              console.warn("Scraping failed with status:", scrapeRes.status);
+            }
+          } catch (scrapeErr) {
+            console.error("Failed to call scraping service:", scrapeErr);
+          }
+        }
+
         setTenders(
           (data.data || []).map(t => ({
             T_ID: t.T_ID,
@@ -495,7 +545,9 @@ export default function ArchivePage() {
       } catch (err) {
         console.error('Failed to fetch tenders', err);
       } finally {
-        setLoading(false);
+        if (!isRetry) {
+          setLoading(false);
+        }
       }
     };
 
@@ -552,7 +604,7 @@ export default function ArchivePage() {
             t.T_ID === tid ? { ...t, interested: data.data.is_interested === 1 } : t
           )
         );
-        
+
         // Show success message
         console.log(data.message);
       } else {

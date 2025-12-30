@@ -1,7 +1,9 @@
 // src/pages/Workdesk/ActiveWorkspaces.jsx
 // Route: /workdesk/active-workspaces
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Loader2 } from "lucide-react";
 import "../../assets/css/ActiveWorkspaces.css";
 import WorkspaceOverview from "./WorkspaceOverview";
 
@@ -62,56 +64,57 @@ const ActiveWorkspaces = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [teamFilter, setTeamFilter] = useState("all");
 
-  const workspaces = [
-    {
-      tenderId: "TND-2024-001",
-      title: "Medical Equipment Supply - Government Hospital Network",
-      deadline: "2024-12-30",
-      team: "Team Alpha",
-      status: "active",
-      progress: 75,
-    },
-    {
-      tenderId: "TND-2024-002",
-      title: "Surgical Instruments Procurement - State Medical Services",
-      deadline: "2024-12-25",
-      team: "Team Beta",
-      status: "urgent",
-      progress: 45,
-    },
-    {
-      tenderId: "TND-2024-003",
-      title: "Diagnostic Devices & Laboratory Equipment Supply",
-      deadline: "2025-01-15",
-      team: "Team Gamma",
-      status: "active",
-      progress: 90,
-    },
-    {
-      tenderId: "TND-2024-004",
-      title: "Cardiac Care Equipment - Multi-Hospital Tender",
-      deadline: "2024-12-28",
-      team: "Team Alpha",
-      status: "review",
-      progress: 60,
-    },
-    {
-      tenderId: "TND-2024-005",
-      title: "Emergency Medical Supplies - Annual Contract",
-      deadline: "2025-01-05",
-      team: "Team Delta",
-      status: "active",
-      progress: 85,
-    },
-    {
-      tenderId: "TND-2024-006",
-      title: "Orthopedic Implants & Instruments Supply",
-      deadline: "2024-12-22",
-      team: "Team Beta",
-      status: "urgent",
-      progress: 35,
-    },
-  ];
+  const [workspaces, setWorkspaces] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchWorkspaces = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          "http://localhost:5000/api/tender-status-history",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (response.data.success) {
+          // Map history items to workspace format
+          const mappedWorkspaces = response.data.data.map((item) => ({
+            tenderId: item.bid_number,
+            title: item.remarks || `Tender ${item.bid_number}`,
+            deadline: "N/A", // Placeholder
+            team: "Unassigned", // Placeholder
+            status: item.status || "active",
+            progress: 0, // Placeholder
+          }));
+          setWorkspaces(mappedWorkspaces);
+        } else {
+          setError("Failed to fetch workspaces");
+        }
+      } catch (err) {
+        console.error("Error fetching active workspaces:", err);
+        setError("Failed to load workspaces");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWorkspaces();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="p-4 text-red-500">Error: {error}</div>;
+  }
 
   const filteredWorkspaces = workspaces.filter((ws) => {
     const matchesSearch =

@@ -1,25 +1,14 @@
 import React, { useState } from 'react';
-import { CheckCircle2, Circle, Search, Filter, Users, ClipboardList } from 'lucide-react';
+import { CheckCircle2, Circle, Search, Filter, Users, ClipboardList, Tag } from 'lucide-react';
 
-const WorkspaceTask = () => {
-  // ---------------- DUMMY TASK DATA ----------------
-  const dummyDepartments = [
-    { id: 1, name: "Engineering", color: "#2563eb" },
-    { id: 2, name: "Finance", color: "#059669" },
-    { id: 3, name: "Legal", color: "#7c3aed" },
-    { id: 4, name: "Operations", color: "#dc2626" },
-    { id: 5, name: "HR", color: "#db2777" },
-    { id: 6, name: "Marketing", color: "#0891b2" },
-  ];
+const WorkspaceTask = ({ departments, tasks }) => {
+  // ---------------- REAL DATA LOGIC ----------------
 
-  const dummyTasks = [
-    { id: 1, title: "Prepare Engineering Report", status: "done", deptId: 1, createdAt: "2025-01-10" },
-    { id: 2, title: "Budget Approval", status: "not-done", deptId: 2, createdAt: "2025-02-11" },
-    { id: 3, title: "Contract Documentation", status: "done", deptId: 3, createdAt: "2025-02-02" },
-    { id: 4, title: "Machine Inspection", status: "not-done", deptId: 1, createdAt: "2025-01-28" },
-    { id: 5, title: "Recruitment Planning", status: "not-done", deptId: 5, createdAt: "2025-02-18" },
-    { id: 6, title: "Tender Legal Review", status: "done", deptId: 3, createdAt: "2025-01-22" },
-  ];
+  // Flatten the nested tasks object { deptId: [tasks] } into a single array
+  // and inject deptId into each task for filtering/display
+  const allTasks = Object.entries(tasks).flatMap(([deptId, deptTasks]) =>
+    deptTasks.map(task => ({ ...task, deptId: Number(deptId) }))
+  );
 
   // ---------------- FILTER STATES ----------------
   const [search, setSearch] = useState("");
@@ -27,18 +16,19 @@ const WorkspaceTask = () => {
   const [filterStatus, setFilterStatus] = useState("all");
 
   // ---------------- FILTER LOGIC ----------------
-  const filteredTasks = dummyTasks.filter(task => {
+  const filteredTasks = allTasks.filter(task => {
     const matchDept = filterDept === "all" || task.deptId === Number(filterDept);
+    // Note: status is strictly "done" or "not-done" in Workspaces.jsx
     const matchStatus = filterStatus === "all" || task.status === filterStatus;
     const matchSearch = task.title.toLowerCase().includes(search.toLowerCase());
     return matchDept && matchStatus && matchSearch;
   });
 
-  const getDept = (id) => dummyDepartments.find(d => d.id === id);
+  const getDept = (id) => departments.find(d => d.id === id);
 
-  const totalTasks = dummyTasks.length;
-  const totalDone = dummyTasks.filter(t => t.status === "done").length;
-  const totalPending = dummyTasks.filter(t => t.status !== "done").length;
+  const totalTasks = allTasks.length;
+  const totalDone = allTasks.filter(t => t.status === "done").length;
+  const totalPending = allTasks.filter(t => t.status !== "done").length;
 
   return (
     <div style={{ minHeight: "100vh", background: "#f3f6fb", padding: "2rem" }}>
@@ -163,7 +153,7 @@ const WorkspaceTask = () => {
                 minWidth: "180px"
               }}>
               <option value="all">All Departments</option>
-              {dummyDepartments.map((d) => (
+              {departments.map((d) => (
                 <option key={d.id} value={d.id}>{d.name}</option>
               ))}
             </select>
@@ -224,6 +214,25 @@ const WorkspaceTask = () => {
                     <p style={{ margin: "0.35rem 0 0 0", fontSize: "0.85rem", color: "#6b7280" }}>
                       {task.createdAt}
                     </p>
+
+                    {task.tags && task.tags.length > 0 && (
+                      <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
+                        {task.tags.map((tag, idx) => (
+                          <span key={idx} style={{
+                            fontSize: '0.7rem',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            background: '#e0f2fe',
+                            color: '#0284c7',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}>
+                            <Tag size={10} /> {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Department Badge */}
                     <span style={{
